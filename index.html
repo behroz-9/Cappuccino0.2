@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cappuccino Social - Firebase Cloud</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Font: Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            maroon: {
+              950: '#0F0407',
+              900: '#1A090D',
+              850: '#230910',
+              800: '#2B0B14',
+              700: '#380C19',
+              600: '#4A1122',
+              500: '#681B32',
+            },
+            rosegold: {
+              400: '#F2C8B0',
+              300: '#E6B89C',
+              200: '#CBB29E',
+              100: '#7C6758',
+            }
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #0F0407;
+      color: #F2C8B0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #1A090D; }
+    ::-webkit-scrollbar-thumb { background: #380C19; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #E6B89C; }
+
+    .glass-card {
+      background: rgba(43, 11, 20, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(230, 184, 156, 0.12);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+    .glass-nav {
+      background: rgba(26, 9, 13, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(230, 184, 156, 0.15);
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.25;
+      pointer-events: none;
+      z-index: 0;
+      animation: floatOrb 12s infinite alternate ease-in-out;
+    }
+    .orb-1 { width: 350px; height: 350px; background: #681B32; top: -50px; left: -50px; }
+    .orb-2 { width: 400px; height: 400px; background: #380C19; bottom: 10%; right: -100px; animation-delay: -5s; }
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, 50px) scale(1.15); }
+    }
+    .heart-bounce { animation: heartPulse 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    @keyframes heartPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.4); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-maroon-600 selection:text-rosegold-300">
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div id="app" class="relative z-10 flex flex-col min-h-screen">
+    
+    <!-- TOP NAVIGATION BAR -->
+    <nav id="navbar" class="hidden sticky top-0 z-40 glass-nav px-4 py-3">
+      <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('feed')">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-maroon-600 to-maroon-800 flex items-center justify-center border border-rosegold-300/30 shadow-lg">
+            <i class="fa-solid fa-mug-hot text-rosegold-300 text-lg"></i>
+          </div>
+          <span class="text-xl font-bold tracking-wide bg-gradient-to-r from-rosegold-300 via-rosegold-200 to-white bg-clip-text text-transparent">Cappuccino</span>
+        </div>
+
+        <div class="relative flex-1 max-w-md hidden md:block">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-rosegold-100/60"></i>
+          <input type="text" id="searchInput" oninput="handleGlobalSearch(this.value)" placeholder="Search friends, usernames, profiles..." class="w-full bg-maroon-900/90 border border-maroon-700/60 rounded-full pl-10 pr-4 py-2 text-sm text-rosegold-300 placeholder-rosegold-100/40 focus:outline-none">
+          <div id="searchResults" class="hidden absolute left-0 right-0 top-12 glass-card rounded-2xl p-2 shadow-2xl border border-rosegold-300/20 max-h-80 overflow-y-auto z-50"></div>
+        </div>
+
+        <div class="flex items-center gap-2 md:gap-4">
+          <button onclick="requestNotificationPermission()" class="p-2.5 rounded-full hover:bg-maroon-800/80 text-rosegold-300 transition relative" title="Enable Web Notifications">
+            <i class="fa-solid fa-bell"></i>
+            <span id="notifBadge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 rounded-full"></span>
+          </button>
+          
+          <button onclick="toggleEmailDrawer()" class="p-2.5 rounded-full hover:bg-maroon-800/80 text-rosegold-300 transition relative" title="Simulation Inbox">
+            <i class="fa-solid fa-envelope"></i>
+            <span id="mailBadge" class="hidden absolute -top-0.5 -right-0.5 px-1.5 py-0.5 text-[10px] bg-rosegold-300 text-maroon-950 font-bold rounded-full">1</span>
+          </button>
+
+          <button onclick="navigateTo('chat')" class="p-2.5 rounded-full hover:bg-maroon-800/80 text-rosegold-300 transition relative" title="Messenger">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+
+          <div onclick="openProfileModal()" class="flex items-center gap-2 pl-2 cursor-pointer group">
+            <img id="navAvatar" src="https://placehold.co/100x100/380C19/E6B89C?text=User" class="w-9 h-9 rounded-full object-cover border border-rosegold-300/40 group-hover:scale-105 transition">
+            <span id="navUsername" class="hidden md:inline font-semibold text-sm text-rosegold-300">@username</span>
+          </div>
+          
+          <button onclick="logoutUser()" class="p-2 rounded-lg text-rosegold-100 hover:text-rose-400 hover:bg-maroon-800/50 transition ml-1" title="Sign Out">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MOBILE SEARCH CONTAINER -->
+    <div id="mobileSearchContainer" class="hidden md:hidden px-4 pt-3 pb-1">
+      <div class="relative w-full">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-rosegold-100/60"></i>
+        <input type="text" oninput="handleGlobalSearch(this.value)" placeholder="Search users..." class="w-full bg-maroon-900/90 border border-maroon-700/60 rounded-full pl-10 pr-4 py-2 text-sm text-rosegold-300 focus:outline-none">
+        <div id="mobileSearchResults" class="hidden absolute left-0 right-0 top-12 glass-card rounded-2xl p-2 shadow-2xl border border-rosegold-300/20 max-h-60 overflow-y-auto z-50"></div>
+      </div>
+    </div>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 flex justify-center items-start">
+      
+      <!-- 1. AUTHENTICATION VIEW -->
+      <section id="authView" class="w-full max-w-md my-auto py-8">
+        <div class="glass-card rounded-3xl p-8 border border-rosegold-300/20 shadow-2xl">
+          <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-maroon-700 to-maroon-500 border border-rosegold-300/40 shadow-xl mb-3">
+              <i class="fa-solid fa-mug-hot text-3xl text-rosegold-300"></i>
+            </div>
+            <h1 class="text-3xl font-extrabold bg-gradient-to-r from-rosegold-300 via-rosegold-200 to-white bg-clip-text text-transparent">Cappuccino</h1>
+            <p class="text-xs text-rosegold-200/70 mt-1">Firebase Cloud Powered Social Experience</p>
+          </div>
+
+          <div class="flex p-1 bg-maroon-950/80 rounded-xl mb-6 border border-maroon-800">
+            <button id="loginTabBtn" onclick="switchAuthTab('login')" class="flex-1 py-2 text-xs font-bold rounded-lg transition bg-maroon-700 text-rosegold-300 shadow">Login</button>
+            <button id="registerTabBtn" onclick="switchAuthTab('register')" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-rosegold-100">Register</button>
+          </div>
+
+          <!-- LOGIN FORM -->
+          <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+            <div>
+              <label class="block text-xs font-medium text-rosegold-200 mb-1">Email Address</label>
+              <input type="email" id="loginEmail" required placeholder="user@example.com" class="w-full bg-maroon-900/80 border border-maroon-700/60 rounded-xl px-3.5 py-2.5 text-sm text-rosegold-300 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-rosegold-200 mb-1">Password</label>
+              <div class="relative">
+                <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full bg-maroon-900/80 border border-maroon-700/60 rounded-xl pl-3.5 pr-10 py-2.5 text-sm text-rosegold-300 focus:outline-none">
+                <i onclick="togglePasswordVisibility('loginPassword', this)" class="fa-solid fa-eye absolute right-3.5 top-1/2 -translate-y-1/2 text-rosegold-100/50 cursor-pointer"></i>
+              </div>
+            </div>
+            <button type="submit" class="w-full py-3 bg-gradient-to-r from-maroon-600 to-maroon-500 text-rosegold-300 font-bold rounded-xl shadow-lg border border-rosegold-300/30 transition">
+              Sign In (Firebase Auth)
+            </button>
+          </form>
+
+          <!-- REGISTER FORM -->
+          <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+            <div>
+              <label class="block text-xs font-medium text-rosegold-200 mb-1">Full Name</label>
+              <input type="text" id="regName" required placeholder="Barista Joe" class="w-full bg-maroon-900/80 border border-maroon-700/60 rounded-xl px-3.5 py-2.5 text-sm text-rosegold-300 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-rosegold-200 mb-1">Username</label>
+              <input type="text" id="regUsername" required placeholder="baristajoe" class="w-full bg-maroon-900/80 border border-maroon-700/60 rounded-xl px-3.5 py-2.5 text-sm text-rosegold-300 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-rosegold-200 mb-1">Email Address</label>
+              <input type="email" id="regEmail" required placeholder="joe@example.com" class="w-full bg-maroon-900/80 border border-maroon-700/60 rounded-xl px-3.5 py-2.5 text-sm text-rosegold-300 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-rosegold-200 mb-1">Password</label>
+              <div class="relative">
+                <input type="password" id="regPassword" required placeholder="••••••••" class="w-full bg-maroon-900/80 border border-maroon-700/60 rounded-xl pl-3.5 pr-10 py-2.5 text-sm text-rosegold-300 focus:outline-none">
+                <i onclick="togglePasswordVisibility('regPassword', this)" class="fa-solid fa-eye absolute right-3.5 top-1/2 -translate-y-1/2 text-rosegold-100/50 cursor-pointer"></i>
+              </div>
+            </div>
+            <button type="submit" class="w-full py-3 bg-gradient-to-r from-maroon-600 to-maroon-500 text-rosegold-300 font-bold rounded-xl shadow-lg border border-rosegold-300/30 transition">
+              Verify Email & Register
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- 2. MAIN FEED VIEW -->
+      <section id="feedView" class="hidden w-full max-w-2xl space-y-6">
+        <div class="glass-card rounded-2xl p-4 md:p-5 border border-rosegold-300/20 shadow-xl">
+          <div class="flex gap-3">
+            <img id="feedPostAvatar" src="https://placehold.co/100x100/380C19/E6B89C?text=Me" class="w-10 h-10 rounded-full object-cover border border-rosegold-300/40">
+            <div class="flex-1">
+              <textarea id="postContentInput" rows="3" placeholder="What's brewing on your mind today?" class="w-full bg-maroon-950/60 border border-maroon-800 rounded-xl p-3 text-sm text-rosegold-300 placeholder-rosegold-100/40 focus:outline-none resize-none"></textarea>
+              
+              <div id="postImagePreviewContainer" class="hidden relative mt-2 rounded-xl overflow-hidden border border-rosegold-300/30">
+                <img id="postImagePreview" class="w-full max-h-60 object-cover">
+                <button onclick="clearPostImage()" class="absolute top-2 right-2 bg-maroon-950/80 text-rose-400 p-1.5 rounded-full"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+
+              <div class="flex items-center justify-between mt-3 pt-2 border-t border-maroon-800/60">
+                <label class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-maroon-900/90 hover:bg-maroon-800 text-rosegold-200 text-xs font-semibold transition border border-rosegold-300/20">
+                  <i class="fa-solid fa-image text-emerald-400"></i> Gallery Photo
+                  <input type="file" id="postImageFileInput" accept="image/*" onchange="handlePostImageSelect(event)" class="hidden">
+                </label>
+                <button onclick="submitNewPost()" class="px-5 py-1.5 bg-gradient-to-r from-maroon-600 to-maroon-500 text-rosegold-300 text-xs font-bold rounded-lg shadow">Brew Post</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="feedPostsList" class="space-y-5"></div>
+      </section>
+
+      <!-- 3. MESSENGER VIEW -->
+      <section id="chatView" class="hidden w-full max-w-5xl h-[calc(100vh-100px)] glass-card rounded-3xl border border-rosegold-300/20 overflow-hidden flex shadow-2xl">
+        <div class="w-full md:w-80 border-r border-rosegold-300/10 flex flex-col bg-maroon-950/50">
+          <div class="p-4 border-b border-rosegold-300/10 flex items-center justify-between">
+            <h2 class="font-bold text-rosegold-300 text-base">Cloud Chat</h2>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">Live Firestore</span>
+          </div>
+          <div id="chatUsersList" class="flex-1 overflow-y-auto divide-y divide-maroon-800/40"></div>
+        </div>
+
+        <div id="chatActivePane" class="hidden md:flex flex-1 flex-col bg-maroon-900/30 relative">
+          <div id="chatHeader" class="px-5 py-3 border-b border-rosegold-300/10 flex items-center justify-between glass-nav">
+            <div class="flex items-center gap-3">
+              <img id="activeChatAvatar" src="https://placehold.co/100x100/380C19/E6B89C?text=User" class="w-10 h-10 rounded-full object-cover border border-rosegold-300/30">
+              <div>
+                <h3 id="activeChatName" class="font-bold text-sm text-rosegold-300">Select User</h3>
+                <p id="activeChatStatus" class="text-[11px] text-rosegold-100/60">Online Cloud</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="messagesContainer" class="flex-1 p-4 overflow-y-auto space-y-3"></div>
+
+          <!-- Chat Attachment Preview -->
+          <div id="chatImagePreviewBox" class="hidden px-4 py-2 border-t border-maroon-800 flex items-center gap-2 bg-maroon-950">
+            <img id="chatImagePreviewImg" class="w-12 h-12 rounded object-cover border border-rosegold-300/40">
+            <span class="text-xs text-rosegold-200 flex-1 truncate">Image Attached</span>
+            <button onclick="clearChatImageAttachment()" class="text-rose-400 text-xs"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+
+          <div class="p-3 border-t border-rosegold-300/10 bg-maroon-950/80 flex items-center gap-2">
+            <label class="p-2.5 rounded-xl bg-maroon-800/60 hover:bg-maroon-800 text-rosegold-200 cursor-pointer transition border border-rosegold-300/15" title="Attach Gallery Photo">
+              <i class="fa-solid fa-paperclip"></i>
+              <input type="file" id="chatAttachmentInput" accept="image/*" onchange="handleChatAttachmentSelect(event)" class="hidden">
+            </label>
+            <input type="text" id="chatInput" onkeypress="handleChatKeyPress(event)" placeholder="Type a message..." class="flex-1 bg-maroon-900/90 border border-maroon-700/60 rounded-xl px-4 py-2.5 text-sm text-rosegold-300 focus:outline-none">
+            <button onclick="sendChatMessage()" class="p-2.5 rounded-xl bg-gradient-to-r from-maroon-600 to-maroon-500 text-rosegold-300 font-bold shadow">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="py-4 text-center text-xs text-rosegold-100/40 border-t border-maroon-800/40">
+      Cappuccino Social Platform &copy; 2026 — Firebase Cloud Synchronized.
+    </footer>
+
+  </div>
+
+  <!-- MODAL: OTP VERIFICATION SIMULATOR -->
+  <div id="otpModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-maroon-950/80 backdrop-blur-md">
+    <div class="glass-card w-full max-w-sm rounded-3xl p-6 border border-rosegold-300/30 shadow-2xl relative text-center">
+      <div class="w-12 h-12 rounded-full bg-maroon-700/60 border border-rosegold-300/30 flex items-center justify-center mx-auto mb-3">
+        <i class="fa-solid fa-shield-halved text-2xl text-rosegold-300"></i>
+      </div>
+      <h3 class="text-xl font-bold text-rosegold-300">Verify Email Address</h3>
+      <p class="text-xs text-rosegold-100/70 mt-1 mb-4">We sent a 6-digit OTP code to <br><span id="otpModalEmailTarget" class="font-bold text-rosegold-300"></span></p>
+
+      <div class="flex justify-center gap-2 mb-4">
+        <input type="text" maxlength="6" id="otpCodeInput" placeholder="123456" class="w-3/4 text-center tracking-[0.5em] text-lg font-bold bg-maroon-900 border border-rosegold-300/40 rounded-xl py-2 text-rosegold-300 focus:outline-none">
+      </div>
+
+      <div id="otpCountdown" class="text-xs text-rosegold-200/80 mb-4">Code expires in <span id="timerSecs" class="font-bold text-rosegold-300">60</span>s</div>
+
+      <div class="space-y-2">
+        <button onclick="verifySubmittedOTP()" class="w-full py-2.5 bg-gradient-to-r from-maroon-600 to-maroon-500 text-rosegold-300 font-bold rounded-xl border border-rosegold-300/30">Confirm Code</button>
+        <button onclick="closeOTPModal()" class="w-full py-2 text-xs text-rosegold-100/60 hover:text-rosegold-300">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PROFILE SETTINGS -->
+  <div id="profileModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-maroon-950/80 backdrop-blur-md">
+    <div class="glass-card w-full max-w-md rounded-3xl p-6 border border-rosegold-300/30 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <button onclick="closeProfileModal()" class="absolute top-4 right-4 text-rosegold-100"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <h3 class="text-xl font-bold text-rosegold-300 mb-4">Edit Profile Settings</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs text-rosegold-200 mb-1">Display Name</label>
+          <input type="text" id="editNameInput" class="w-full bg-maroon-900 border border-maroon-700 rounded-xl px-3 py-2 text-sm text-rosegold-300">
+        </div>
+        <div>
+          <label class="block text-xs text-rosegold-200 mb-1">Bio / Status</label>
+          <textarea id="editBioInput" rows="2" class="w-full bg-maroon-900 border border-maroon-700 rounded-xl p-3 text-sm text-rosegold-300 resize-none"></textarea>
+        </div>
+        <button onclick="saveProfileChanges()" class="w-full py-2.5 bg-gradient-to-r from-maroon-600 to-maroon-500 text-rosegold-300 font-bold rounded-xl">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIRTUAL EMAIL INBOX DRAWER -->
+  <div id="emailDrawer" class="fixed right-0 top-0 bottom-0 w-80 max-w-full glass-card border-l border-rosegold-300/20 z-50 p-4 transform translate-x-full transition-transform duration-300 flex flex-col shadow-2xl">
+    <div class="flex items-center justify-between pb-3 border-b border-rosegold-300/10">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-inbox text-rosegold-300"></i>
+        <h3 class="font-bold text-sm text-rosegold-300">Virtual Inbox Simulator</h3>
+      </div>
+      <button onclick="toggleEmailDrawer()" class="text-rosegold-200"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="virtualEmailList" class="flex-1 overflow-y-auto mt-3 space-y-2"></div>
+  </div>
+
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- FIREBASE MODULAR SDK & FULL APP ENGINE -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+      getAuth, 
+      createUserWithEmailAndPassword, 
+      signInWithEmailAndPassword, 
+      signOut, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { 
+      getFirestore, 
+      collection, 
+      doc, 
+      setDoc, 
+      getDoc, 
+      getDocs, 
+      addDoc, 
+      query, 
+      orderBy, 
+      onSnapshot, 
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCfOQhdKkq9rTMezR1CRTil011hnTOqF3g",
+      authDomain: "cappuccino-2c42d.firebaseapp.com",
+      projectId: "cappuccino-2c42d",
+      storageBucket: "cappuccino-2c42d.firebasestorage.app",
+      messagingSenderId: "513509995040",
+      appId: "1:513509995040:web:64d8578bc17d8e55850245"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUserProfile = null;
+    let selectedPostImageData = null;
+    let selectedChatAttachmentData = null;
+    let activeChatUserId = null;
+    let pendingVerificationData = null;
+    let activeOTPCode = null;
+    let otpTimerInterval = null;
+    let unsubscribePosts = null;
+    let unsubscribeMessages = null;
+
+    window.switchAuthTab = function(tab) {
+      const loginForm = document.getElementById('loginForm');
+      const registerForm = document.getElementById('registerForm');
+      const loginBtn = document.getElementById('loginTabBtn');
+      const regBtn = document.getElementById('registerTabBtn');
+
+      if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+        loginBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition bg-maroon-700 text-rosegold-300 shadow";
+        regBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-rosegold-100";
+      } else {
+        loginForm.classList.add('hidden');
+        registerForm.classList.remove('hidden');
+        regBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition bg-maroon-700 text-rosegold-300 shadow";
+        loginBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-rosegold-100";
+      }
+    };
+
+    window.togglePasswordVisibility = function(inputId, icon) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+      }
+    };
+
+    window.handleRegister = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('regName').value.trim();
+      const username = document.getElementById('regUsername').value.trim().toLowerCase();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+
+      pendingVerificationData = { name, username, email, password };
+      sendSimulatedOTPEmail(email);
+    };
+
+    function sendSimulatedOTPEmail(email) {
+      activeOTPCode = Math.floor(100000 + Math.random() * 900000).toString();
+      document.getElementById('otpModalEmailTarget').innerText = email;
+      document.getElementById('otpModal').classList.remove('hidden');
+
+      let secs = 60;
+      document.getElementById('timerSecs').innerText = secs;
+      clearInterval(otpTimerInterval);
+      otpTimerInterval = setInterval(() => {
+        secs--;
+        document.getElementById('timerSecs').innerText = secs;
+        if (secs <= 0) {
+          clearInterval(otpTimerInterval);
+          activeOTPCode = null;
+        }
+      }, 1000);
+
+      addSimulatedInboxItem(email, "Cappuccino Verification Code", `Your 6-digit verification code is: <b>${activeOTPCode}</b>`);
+      showToast("OTP code sent to Virtual Inbox!");
+    }
+
+    window.verifySubmittedOTP = async function() {
+      const code = document.getElementById('otpCodeInput').value.trim();
+      if (code === activeOTPCode && pendingVerificationData) {
+        try {
+          const cred = await createUserWithEmailAndPassword(auth, pendingVerificationData.email, pendingVerificationData.password);
+          const userProfile = {
+            id: cred.user.uid,
+            name: pendingVerificationData.name,
+            username: pendingVerificationData.username,
+            email: pendingVerificationData.email,
+            avatar: `https://placehold.co/100x100/380C19/E6B89C?text=${pendingVerificationData.name.charAt(0)}`,
+            cover: '',
+            bio: 'Sipping cappuccino and brewing moments...',
+            createdAt: Date.now()
+          };
+          await setDoc(doc(db, "users", cred.user.uid), userProfile);
+          closeOTPModal();
+          showToast("Email verified & account registered successfully!");
+        } catch (err) {
+          showToast(err.message, "error");
+        }
+      } else {
+        showToast("Invalid or expired OTP code!", "error");
+      }
+    };
+
+    window.closeOTPModal = function() {
+      document.getElementById('otpModal').classList.add('hidden');
+      clearInterval(otpTimerInterval);
+    };
+
+    function addSimulatedInboxItem(to, subject, body) {
+      const drawer = document.getElementById('virtualEmailList');
+      const item = document.createElement('div');
+      item.className = "p-3 glass-card rounded-xl border border-rosegold-300/20 text-xs space-y-1";
+      item.innerHTML = `
+        <div class="flex justify-between font-bold text-rosegold-300">
+          <span>Cappuccino Auth System</span>
+          <span class="text-[10px] text-rosegold-100/60">${new Date().toLocaleTimeString()}</span>
+        </div>
+        <div class="font-medium text-rosegold-200">${subject}</div>
+        <div class="text-rosegold-100/80">${body}</div>
+      `;
+      drawer.prepend(item);
+      document.getElementById('mailBadge').classList.remove('hidden');
+    }
+
+    window.toggleEmailDrawer = function() {
+      const drawer = document.getElementById('emailDrawer');
+      drawer.classList.toggle('translate-x-full');
+      document.getElementById('mailBadge').classList.add('hidden');
+    };
+
+    window.handleLogin = async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        showToast("Logged in successfully!");
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    };
+
+    window.logoutUser = async function() {
+      await signOut(auth);
+      location.reload();
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          currentUserProfile = docSnap.data();
+        } else {
+          currentUserProfile = {
+            id: user.uid,
+            name: user.email.split('@')[0],
+            username: user.email.split('@')[0],
+            email: user.email,
+            avatar: `https://placehold.co/100x100/380C19/E6B89C?text=U`,
+            bio: ''
+          };
+        }
+
+        document.getElementById('authView').classList.add('hidden');
+        document.getElementById('navbar').classList.remove('hidden');
+        document.getElementById('navAvatar').src = currentUserProfile.avatar;
+        document.getElementById('navUsername').innerText = '@' + currentUserProfile.username;
+        document.getElementById('feedPostAvatar').src = currentUserProfile.avatar;
+
+        navigateTo('feed');
+      } else {
+        document.getElementById('authView').classList.remove('hidden');
+        document.getElementById('navbar').classList.add('hidden');
+      }
+    });
+
+    window.navigateTo = function(view) {
+      document.getElementById('feedView').classList.add('hidden');
+      document.getElementById('chatView').classList.add('hidden');
+
+      if (view === 'feed') {
+        document.getElementById('feedView').classList.remove('hidden');
+        loadRealtimeFeed();
+      } else if (view === 'chat') {
+        document.getElementById('chatView').classList.remove('hidden');
+        loadChatUsers();
+      }
+    };
+
+    window.handlePostImageSelect = function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          selectedPostImageData = evt.target.result;
+          document.getElementById('postImagePreview').src = selectedPostImageData;
+          document.getElementById('postImagePreviewContainer').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    window.clearPostImage = function() {
+      selectedPostImageData = null;
+      document.getElementById('postImageFileInput').value = '';
+      document.getElementById('postImagePreviewContainer').classList.add('hidden');
+    };
+
+    window.handleChatAttachmentSelect = function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          selectedChatAttachmentData = evt.target.result;
+          document.getElementById('chatImagePreviewImg').src = selectedChatAttachmentData;
+          document.getElementById('chatImagePreviewBox').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    window.clearChatImageAttachment = function() {
+      selectedChatAttachmentData = null;
+      document.getElementById('chatAttachmentInput').value = '';
+      document.getElementById('chatImagePreviewBox').classList.add('hidden');
+    };
+
+    window.submitNewPost = async function() {
+      const content = document.getElementById('postContentInput').value.trim();
+      if (!content && !selectedPostImageData) {
+        showToast("Post content or image required!", "error");
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, "posts"), {
+          userId: currentUserProfile.id,
+          userName: currentUserProfile.name,
+          userUsername: currentUserProfile.username,
+          userAvatar: currentUserProfile.avatar,
+          content: content,
+          image: selectedPostImageData || null,
+          likes: [],
+          comments: [],
+          createdAt: serverTimestamp()
+        });
+
+        document.getElementById('postContentInput').value = '';
+        clearPostImage();
+        showToast("Post published to Firestore cloud!");
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    };
+
+    function loadRealtimeFeed() {
+      if (unsubscribePosts) unsubscribePosts();
+      const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+      
+      unsubscribePosts = onSnapshot(q, (snapshot) => {
+        const postsContainer = document.getElementById('feedPostsList');
+        if (snapshot.empty) {
+          postsContainer.innerHTML = `<div class="text-center py-12 glass-card rounded-2xl text-rosegold-200/70 text-sm">No posts in cloud yet. Be the first!</div>`;
+          return;
+        }
+
+        let html = '';
+        snapshot.forEach((docSnap) => {
+          const post = docSnap.data();
+          const postId = docSnap.id;
+          const isLiked = post.likes && post.likes.includes(currentUserProfile.id);
+
+          html += `
+            <div class="glass-card rounded-2xl p-5 border border-rosegold-300/20 shadow-xl space-y-4">
+              <div class="flex items-center gap-3">
+                <img src="${post.userAvatar}" class="w-10 h-10 rounded-full object-cover border border-rosegold-300/30">
+                <div>
+                  <h4 class="font-bold text-sm text-rosegold-300">${post.userName}</h4>
+                  <p class="text-xs text-rosegold-100/60">@${post.userUsername}</p>
+                </div>
+              </div>
+              <p class="text-sm text-rosegold-200 leading-relaxed">${escapeHtml(post.content)}</p>
+              ${post.image ? `<img src="${post.image}" class="w-full max-h-96 object-cover rounded-xl border border-rosegold-300/20">` : ''}
+              
+              <div class="flex items-center gap-4 pt-2 border-t border-maroon-800/60 text-xs text-rosegold-200">
+                <button onclick="toggleLikePost('${postId}', ${isLiked})" class="flex items-center gap-1.5 hover:text-rose-400 ${isLiked ? 'text-rose-500 font-bold' : ''}">
+                  <i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart text-base heart-bounce"></i>
+                  <span>${post.likes ? post.likes.length : 0} Likes</span>
+                </button>
+              </div>
+
+              <!-- Comment Input Section -->
+              <div class="pt-3 border-t border-maroon-800/40 space-y-3">
+                <div class="flex gap-2">
+                  <input type="text" id="commentInput_${postId}" placeholder="Write a comment..." class="flex-1 bg-maroon-900 border border-maroon-700/60 rounded-xl px-3 py-1.5 text-xs text-rosegold-300 focus:outline-none">
+                  <button onclick="submitComment('${postId}')" class="px-3 py-1.5 bg-maroon-700 text-rosegold-300 text-xs font-semibold rounded-xl">Reply</button>
+                </div>
+                <div class="space-y-2">
+                  ${(post.comments || []).map(c => `
+                    <div class="bg-maroon-950/60 p-2 rounded-xl text-xs space-y-0.5">
+                      <div class="font-bold text-rosegold-300">@${c.username}</div>
+                      <div class="text-rosegold-200">${escapeHtml(c.text)}</div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        postsContainer.innerHTML = html;
+      });
+    }
+
+    window.toggleLikePost = async function(postId, isLiked) {
+      const postRef = doc(db, "posts", postId);
+      const postSnap = await getDoc(postRef);
+      if (postSnap.exists()) {
+        let likes = postSnap.data().likes || [];
+        if (isLiked) {
+          likes = likes.filter(id => id !== currentUserProfile.id);
+        } else {
+          likes.push(currentUserProfile.id);
+        }
+        await setDoc(postRef, { likes }, { merge: true });
+      }
+    };
+
+    window.submitComment = async function(postId) {
+      const input = document.getElementById(`commentInput_${postId}`);
+      const text = input.value.trim();
+      if (!text) return;
+
+      const postRef = doc(db, "posts", postId);
+      const postSnap = await getDoc(postRef);
+      if (postSnap.exists()) {
+        let comments = postSnap.data().comments || [];
+        comments.push({
+          id: 'c_' + Date.now(),
+          userId: currentUserProfile.id,
+          username: currentUserProfile.username,
+          text: text,
+          createdAt: Date.now()
+        });
+        await setDoc(postRef, { comments }, { merge: true });
+        input.value = '';
+      }
+    };
+
+    async function loadChatUsers() {
+      const usersSnap = await getDocs(collection(db, "users"));
+      const usersList = document.getElementById('chatUsersList');
+      let html = '';
+      usersSnap.forEach((docSnap) => {
+        const u = docSnap.data();
+        if (u.id !== currentUserProfile.id) {
+          html += `
+            <div onclick="selectActiveChatUser('${u.id}', '${u.name}', '${u.username}', '${u.avatar}')" class="p-3.5 flex items-center gap-3 hover:bg-maroon-900/60 cursor-pointer transition">
+              <img src="${u.avatar}" class="w-10 h-10 rounded-full object-cover border border-rosegold-300/30">
+              <div class="flex-1 truncate">
+                <h4 class="font-bold text-xs text-rosegold-300 truncate">${u.name}</h4>
+                <p class="text-[11px] text-rosegold-100/60 truncate">@${u.username}</p>
+              </div>
+            </div>
+          `;
+        }
+      });
+      usersList.innerHTML = html || `<div class="p-4 text-xs text-rosegold-100/50 text-center">No other users online.</div>`;
+    }
+
+    window.selectActiveChatUser = function(userId, name, username, avatar) {
+      activeChatUserId = userId;
+      document.getElementById('activeChatName').innerText = name;
+      document.getElementById('activeChatStatus').innerText = '@' + username;
+      document.getElementById('activeChatAvatar').src = avatar;
+      document.getElementById('chatActivePane').classList.remove('hidden');
+      loadRealtimeMessages();
+    };
+
+    window.sendChatMessage = async function() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text && !selectedChatAttachmentData) return;
+      if (!activeChatUserId) return;
+
+      try {
+        await addDoc(collection(db, "messages"), {
+          senderId: currentUserProfile.id,
+          receiverId: activeChatUserId,
+          text: text,
+          attachment: selectedChatAttachmentData || null,
+          createdAt: serverTimestamp()
+        });
+        input.value = '';
+        clearChatImageAttachment();
+      } catch (err) {
+        showToast(err.message, "error");
+      }
+    };
+
+    window.handleChatKeyPress = function(e) {
+      if (e.key === 'Enter') sendChatMessage();
+    };
+
+    function loadRealtimeMessages() {
+      if (unsubscribeMessages) unsubscribeMessages();
+      const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
+
+      unsubscribeMessages = onSnapshot(q, (snapshot) => {
+        const container = document.getElementById('messagesContainer');
+        let html = '';
+        snapshot.forEach((docSnap) => {
+          const m = docSnap.data();
+          if (
+            (m.senderId === currentUserProfile.id && m.receiverId === activeChatUserId) ||
+            (m.senderId === activeChatUserId && m.receiverId === currentUserProfile.id)
+          ) {
+            const isMine = m.senderId === currentUserProfile.id;
+            html += `
+              <div class="flex flex-col ${isMine ? 'items-end' : 'items-start'}">
+                <div class="max-w-[75%] p-3 rounded-2xl ${isMine ? 'bg-gradient-to-r from-maroon-700 to-maroon-600 text-rosegold-200' : 'bg-maroon-950 text-rosegold-300'} shadow-md">
+                  ${m.attachment ? `<img src="${m.attachment}" class="w-full max-h-48 object-cover rounded-xl mb-2">` : ''}
+                  <p class="text-xs leading-relaxed">${escapeHtml(m.text)}</p>
+                </div>
+              </div>
+            `;
+          }
+        });
+        container.innerHTML = html;
+        container.scrollTop = container.scrollHeight;
+      });
+    }
+
+    window.openProfileModal = function() {
+      document.getElementById('editNameInput').value = currentUserProfile.name;
+      document.getElementById('editBioInput').value = currentUserProfile.bio || '';
+      document.getElementById('profileModal').classList.remove('hidden');
+    };
+    window.closeProfileModal = function() {
+      document.getElementById('profileModal').classList.add('hidden');
+    };
+    window.saveProfileChanges = async function() {
+      const newName = document.getElementById('editNameInput').value.trim();
+      const newBio = document.getElementById('editBioInput').value.trim();
+      if (!newName) return;
+
+      currentUserProfile.name = newName;
+      currentUserProfile.bio = newBio;
+      await setDoc(doc(db, "users", currentUserProfile.id), currentUserProfile, { merge: true });
+      document.getElementById('navUsername').innerText = '@' + currentUserProfile.username;
+      closeProfileModal();
+      showToast("Profile updated successfully!");
+    };
+
+    window.handleGlobalSearch = async function(queryStr) {
+      const resultsContainer = document.getElementById('searchResults');
+      const mobileResults = document.getElementById('mobileSearchResults');
+
+      if (!queryStr.trim()) {
+        resultsContainer.classList.add('hidden');
+        mobileResults.classList.add('hidden');
+        return;
+      }
+
+      const usersSnap = await getDocs(collection(db, "users"));
+      let html = '';
+      usersSnap.forEach((docSnap) => {
+        const u = docSnap.data();
+        if (u.id !== currentUserProfile.id && (u.name.toLowerCase().includes(queryStr.toLowerCase()) || u.username.toLowerCase().includes(queryStr.toLowerCase()))) {
+          html += `
+            <div onclick="selectActiveChatUser('${u.id}', '${u.name}', '${u.username}', '${u.avatar}'); navigateTo('chat');" class="p-2.5 hover:bg-maroon-800/60 rounded-xl flex items-center justify-between cursor-pointer">
+              <div class="flex items-center gap-2">
+                <img src="${u.avatar}" class="w-8 h-8 rounded-full object-cover">
+                <div>
+                  <div class="font-bold text-xs text-rosegold-300">${u.name}</div>
+                  <div class="text-[10px] text-rosegold-100/60">@${u.username}</div>
+                </div>
+              </div>
+              <button class="px-2.5 py-1 bg-maroon-700 text-[10px] text-rosegold-300 font-bold rounded-lg">Chat</button>
+            </div>
+          `;
+        }
+      });
+
+      resultsContainer.innerHTML = html || `<div class="p-2 text-xs text-rosegold-100/50 text-center">No users found.</div>`;
+      resultsContainer.classList.remove('hidden');
+      mobileResults.innerHTML = resultsContainer.innerHTML;
+      mobileResults.classList.remove('hidden');
+    };
+
+    window.requestNotificationPermission = function() {
+      if ('Notification' in window) {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            showToast("Web Notifications enabled!");
+          }
+        });
+      }
+    };
+
+    function showToast(msg, type = "success") {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `p-3.5 glass-card rounded-2xl border ${type === 'error' ? 'border-rose-500 text-rose-300' : 'border-rosegold-300/40 text-rosegold-200'} text-xs shadow-2xl flex items-center gap-2`;
+      toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'}"></i> <span>${msg}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3500);
+    }
+
+    function escapeHtml(str) {
+      return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+    }
+  </script>
+</body>
+</html>
