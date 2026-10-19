@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cappuccino Social — Ultimate Dark Experience</title>
+  <title>Cappuccino Social — Live Two-Way Chat & Public CC Experience</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
@@ -260,11 +260,11 @@
           <div id="feedPostsList" class="space-y-5"></div>
         </div>
 
-        <!-- Right Sidebar: Suggested For You (Public Users Directory) -->
+        <!-- Right Sidebar: Suggested For You (Public Directory) -->
         <div class="lg:col-span-4 space-y-4">
           <div class="glass-card rounded-2xl p-4 border border-rosegold-300/20 shadow-xl sticky top-20">
             <h3 class="font-bold text-xs uppercase tracking-wider text-rosegold-300 mb-3 flex items-center gap-2">
-              <i class="fa-solid fa-user-plus text-rosegold-400"></i> Suggested For You (Public)
+              <i class="fa-solid fa-user-plus text-rosegold-400"></i> Suggested For You (Public CC)
             </h3>
             <div id="suggestedUsersList" class="space-y-3"></div>
           </div>
@@ -409,7 +409,7 @@
 
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
 
-  <!-- JAVASCRIPT APP ENGINE -->
+  <!-- JAVASCRIPT APP ENGINE WITH REAL-TIME LIVE TWO-WAY SYNC -->
   <script>
     const DB_NAME = 'CappuccinoDB';
     const DB_VERSION = 1;
@@ -468,13 +468,14 @@
         if (activeChatUserId && activeChatUserId === payload.senderId) {
           showLiveTypingIndicator(payload.isTyping);
         }
-      } else if (type === 'USER_STATUS_CHANGE' || type === 'FOLLOW_UPDATE') {
-        // Refresh current user session info from DB in multi-tab context
+      } else if (type === 'USER_STATUS_CHANGE' || type === 'NEW_USER_REGISTERED' || type === 'FOLLOW_UPDATE') {
         const users = await dbGetAll('users');
-        const updatedMe = users.find(u => u.id === currentUser.id);
-        if (updatedMe) {
-          currentUser = updatedMe;
-          localStorage.setItem('cappuccino_session', JSON.stringify(currentUser));
+        if (currentUser) {
+          const updatedMe = users.find(u => u.id === currentUser.id);
+          if (updatedMe) {
+            currentUser = updatedMe;
+            localStorage.setItem('cappuccino_session', JSON.stringify(currentUser));
+          }
         }
         loadSuggestedUsers();
         renderChatUsers();
@@ -501,6 +502,7 @@
         currentUser = JSON.parse(savedUser);
         currentUser.isOnline = true;
         currentUser.lastSeen = Date.now();
+        if (!currentUser.following) currentUser.following = [];
         await dbPut('users', currentUser);
         setupAuthenticatedUI();
       } else {
@@ -632,7 +634,9 @@
         await dbPut('users', pendingVerificationUser);
         currentUser = pendingVerificationUser;
         localStorage.setItem('cappuccino_session', JSON.stringify(currentUser));
-        broadcastEvent('USER_STATUS_CHANGE', { userId: currentUser.id });
+        
+        // Broadcast to all tabs and other opened browser windows that a new public user joined!
+        broadcastEvent('NEW_USER_REGISTERED', { userId: currentUser.id });
         
         closeOTPModal();
         showToast("Email verified! Account created successfully.");
@@ -702,7 +706,7 @@
     }
 
     /* ==========================================================================
-       SUGGESTED USERS (PUBLIC DIRECTORY EXCLUDING MYSELF)
+       SUGGESTED PUBLIC USERS DIRECTORY (EXCLUDING MYSELF)
        ========================================================================== */
     async function loadSuggestedUsers() {
       const container = document.getElementById('suggestedUsersList');
@@ -712,7 +716,7 @@
       if (!currentUser.following) currentUser.following = [];
       const followingList = currentUser.following;
       
-      // Filter out current logged in user so my own account never shows up in suggestion
+      // Exclude current user so own ID never shows up in suggestion
       const suggestions = users.filter(u => u.id !== currentUser.id);
 
       if (suggestions.length === 0) {
@@ -748,11 +752,9 @@
               <button onclick="toggleFollowUser('${u.id}')" class="px-2.5 py-1 text-[10px] font-bold rounded-lg border transition ${isFollowing ? 'bg-maroon-950 text-rosegold-300 border-maroon-700 hover:bg-rose-950 hover:text-rose-300' : 'bg-gradient-to-r from-maroon-600 to-maroon-500 text-rosegold-300 border-rosegold-300/30'}">
                 ${isFollowing ? 'Following' : 'Follow'}
               </button>
-              ${isFollowing ? `
-                <button onclick="startChatWithUser('${u.id}')" class="p-1.5 bg-maroon-700 hover:bg-maroon-600 text-rosegold-300 rounded-lg border border-rosegold-300/20 text-[10px]" title="Chat">
-                  <i class="fa-solid fa-paper-plane"></i>
-                </button>
-              ` : ''}
+              <button onclick="startChatWithUser('${u.id}')" class="p-1.5 bg-maroon-700 hover:bg-maroon-600 text-rosegold-300 rounded-lg border border-rosegold-300/20 text-[10px]" title="Chat">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
             </div>
           </div>
         `;
@@ -903,7 +905,7 @@
       const posts = await dbGetAll('posts');
       const post = posts.find(p => p.id === postId);
       if (post) {
-        const idx = post.likes.indexOf(currentUser.id);
+        const idx = post.likes.includes(currentUser.id);
         if (idx > -1) {
           post.likes.splice(idx, 1);
         } else {
@@ -916,19 +918,17 @@
     }
 
     /* ==========================================================================
-       TWO-WAY LIVE MESSENGER ENGINE
+       REAL-TIME TWO-WAY LIVE MESSENGER ENGINE
        ========================================================================== */
     async function renderChatUsers() {
       const usersList = document.getElementById('chatUsersList');
       const users = await dbGetAll('users');
-      if (!currentUser.following) currentUser.following = [];
-      const followingList = currentUser.following;
       
-      // Show followed users in chat list for two-way communication
-      const chatableUsers = users.filter(u => u.id !== currentUser.id && followingList.includes(u.id));
+      // Show all registered public users so you can message anyone directly from the chat sidebar!
+      const chatableUsers = users.filter(u => u.id !== currentUser.id);
 
       if (chatableUsers.length === 0) {
-        usersList.innerHTML = `<div class="p-4 text-xs text-rosegold-100/50 text-center">Follow users from the Suggested list on your Feed to start two-way chatting with them!</div>`;
+        usersList.innerHTML = `<div class="p-4 text-xs text-rosegold-100/50 text-center">No other public users available yet.</div>`;
         return;
       }
 
@@ -954,13 +954,15 @@
       const users = await dbGetAll('users');
       const activeUser = users.find(u => u.id === userId);
 
-      document.getElementById('activeChatName').innerText = activeUser.name;
-      document.getElementById('activeChatStatus').innerText = activeUser.isOnline ? 'Active Now' : `Last seen: ${activeUser.lastSeen ? new Date(activeUser.lastSeen).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Offline'}`;
-      document.getElementById('activeChatAvatar').src = activeUser.avatar;
+      if (activeUser) {
+        document.getElementById('activeChatName').innerText = activeUser.name;
+        document.getElementById('activeChatStatus').innerText = activeUser.isOnline ? 'Active Now' : `Last seen: ${activeUser.lastSeen ? new Date(activeUser.lastSeen).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Offline'}`;
+        document.getElementById('activeChatAvatar').src = activeUser.avatar;
 
-      document.getElementById('chatActivePane').classList.remove('hidden');
-      renderMessagesList();
-      renderChatUsers();
+        document.getElementById('chatActivePane').classList.remove('hidden');
+        renderMessagesList();
+        renderChatUsers();
+      }
     }
 
     async function sendChatMessage() {
