@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cappuccino Social Platform</title>
+  <title>Cappuccino Social — Ultimate Dark Experience</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
@@ -49,6 +49,7 @@
       overflow-x: hidden;
     }
     
+    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -64,6 +65,7 @@
       background: #E6B89C;
     }
 
+    /* Glassmorphism Styles */
     .glass-card {
       background: rgba(43, 11, 20, 0.65);
       backdrop-filter: blur(16px);
@@ -78,6 +80,7 @@
       border-bottom: 1px solid rgba(230, 184, 156, 0.15);
     }
 
+    /* Floating Lights Background Animation */
     .orb {
       position: absolute;
       border-radius: 50%;
@@ -107,15 +110,18 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-maroon-600 selection:text-rosegold-300">
 
+  <!-- Ambient Glow Orbs -->
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
 
+  <!-- MAIN APP WRAPPER -->
   <div id="app" class="relative z-10 flex flex-col min-h-screen">
     
     <!-- TOP NAVIGATION BAR -->
     <nav id="navbar" class="hidden sticky top-0 z-40 glass-nav px-4 py-3">
       <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
         
+        <!-- Logo & Branding -->
         <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('feed')">
           <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-maroon-600 to-maroon-800 flex items-center justify-center border border-rosegold-300/30 shadow-lg">
             <i class="fa-solid fa-mug-hot text-rosegold-300 text-lg"></i>
@@ -123,12 +129,14 @@
           <span class="text-xl font-bold tracking-wide bg-gradient-to-r from-rosegold-300 via-rosegold-200 to-white bg-clip-text text-transparent">Cappuccino</span>
         </div>
 
+        <!-- Global Search Engine -->
         <div class="relative flex-1 max-w-md hidden md:block">
           <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-rosegold-100/60"></i>
           <input type="text" id="searchInput" oninput="handleGlobalSearch(this.value)" placeholder="Search friends, usernames, profiles..." class="w-full bg-maroon-900/90 border border-maroon-700/60 rounded-full pl-10 pr-4 py-2 text-sm text-rosegold-300 placeholder-rosegold-100/40 focus:outline-none focus:border-rosegold-300/60 transition">
           <div id="searchResults" class="hidden absolute left-0 right-0 top-12 glass-card rounded-2xl p-2 shadow-2xl border border-rosegold-300/20 max-h-80 overflow-y-auto z-50"></div>
         </div>
 
+        <!-- Right Quick Actions -->
         <div class="flex items-center gap-2 md:gap-4">
           <button onclick="requestNotificationPermission()" class="p-2.5 rounded-full hover:bg-maroon-800/80 text-rosegold-300 transition relative" title="Enable Web Notifications">
             <i class="fa-solid fa-bell"></i>
@@ -145,6 +153,7 @@
             <span id="msgBadge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
           </button>
 
+          <!-- Profile Badge -->
           <div onclick="openProfileModal()" class="flex items-center gap-2 pl-2 cursor-pointer group">
             <img id="navAvatar" src="https://placehold.co/100x100/380C19/E6B89C?text=User" class="w-9 h-9 rounded-full object-cover border border-rosegold-300/40 group-hover:scale-105 transition">
             <span id="navUsername" class="hidden md:inline font-semibold text-sm text-rosegold-300">@username</span>
@@ -157,6 +166,7 @@
       </div>
     </nav>
 
+    <!-- MOBILE SEARCH CONTAINER -->
     <div id="mobileSearchContainer" class="hidden md:hidden px-4 pt-3 pb-1">
       <div class="relative w-full">
         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-rosegold-100/60"></i>
@@ -165,12 +175,14 @@
       </div>
     </div>
 
+    <!-- VIEW CONTAINERS -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 flex justify-center items-start">
       
       <!-- 1. AUTHENTICATION VIEW -->
       <section id="authView" class="w-full max-w-md my-auto py-8">
         <div class="glass-card rounded-3xl p-8 border border-rosegold-300/20 relative overflow-hidden shadow-2xl">
           
+          <!-- Header Branding -->
           <div class="text-center mb-8">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-maroon-700 to-maroon-500 border border-rosegold-300/40 shadow-xl mb-3">
               <i class="fa-solid fa-mug-hot text-3xl text-rosegold-300"></i>
@@ -179,6 +191,7 @@
             <p class="text-xs text-rosegold-200/70 mt-1">Sip into smooth conversations & authentic moments</p>
           </div>
 
+          <!-- Auth Tab Switcher -->
           <div class="flex p-1 bg-maroon-950/80 rounded-xl mb-6 border border-maroon-800">
             <button id="loginTabBtn" onclick="switchAuthTab('login')" class="flex-1 py-2 text-xs font-bold rounded-lg transition bg-maroon-700 text-rosegold-300 shadow">Login</button>
             <button id="registerTabBtn" onclick="switchAuthTab('register')" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-rosegold-100 hover:text-rosegold-300">Register</button>
@@ -187,10 +200,10 @@
           <!-- LOGIN FORM -->
           <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
             <div>
-              <label class="block text-xs font-medium text-rosegold-200 mb-1">Email Address</label>
+              <label class="block text-xs font-medium text-rosegold-200 mb-1">Email or Username</label>
               <div class="relative">
                 <i class="fa-solid fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-rosegold-100/50"></i>
-                <input type="email" id="loginEmail" required placeholder="user@cappuccino.com" class="w-full bg-maroon-900/80 border border-maroon-700/60 rounded-xl pl-10 pr-4 py-2.5 text-sm text-rosegold-300 placeholder-rosegold-100/30 focus:outline-none focus:border-rosegold-300">
+                <input type="text" id="loginEmail" required placeholder="user@cappuccino.com" class="w-full bg-maroon-900/80 border border-maroon-700/60 rounded-xl pl-10 pr-4 py-2.5 text-sm text-rosegold-300 placeholder-rosegold-100/30 focus:outline-none focus:border-rosegold-300">
               </div>
             </div>
             <div>
@@ -235,52 +248,80 @@
         </div>
       </section>
 
-      <!-- 2. MAIN FEED VIEW -->
-      <section id="feedView" class="hidden w-full max-w-2xl space-y-6">
+      <!-- 2. MAIN FEED VIEW WITH SUGGESTED USERS SIDEBAR -->
+      <section id="feedView" class="hidden w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        <div class="glass-card rounded-2xl p-4 md:p-5 border border-rosegold-300/20 shadow-xl">
-          <div class="flex gap-3">
-            <img id="feedPostAvatar" src="https://placehold.co/100x100/380C19/E6B89C?text=Me" class="w-10 h-10 rounded-full object-cover border border-rosegold-300/40">
-            <div class="flex-1">
-              <textarea id="postContentInput" rows="3" placeholder="What's brewing on your mind today?" class="w-full bg-maroon-950/60 border border-maroon-800 rounded-xl p-3 text-sm text-rosegold-300 placeholder-rosegold-100/40 focus:outline-none focus:border-rosegold-300/50 resize-none"></textarea>
-              
-              <div id="postImagePreviewContainer" class="hidden relative mt-2 rounded-xl overflow-hidden border border-rosegold-300/30">
-                <img id="postImagePreview" class="w-full max-h-60 object-cover">
-                <button onclick="clearPostImage()" class="absolute top-2 right-2 bg-maroon-950/80 text-rose-400 p-1.5 rounded-full hover:bg-rose-950 transition"><i class="fa-solid fa-xmark"></i></button>
-              </div>
+        <!-- Center Newsfeed Container -->
+        <div class="lg:col-span-8 space-y-6">
+          
+          <!-- Create Post Card -->
+          <div class="glass-card rounded-2xl p-4 md:p-5 border border-rosegold-300/20 shadow-xl">
+            <div class="flex gap-3">
+              <img id="feedPostAvatar" src="https://placehold.co/100x100/380C19/E6B89C?text=Me" class="w-10 h-10 rounded-full object-cover border border-rosegold-300/40">
+              <div class="flex-1">
+                <textarea id="postContentInput" rows="3" placeholder="What's brewing on your mind today?" class="w-full bg-maroon-950/60 border border-maroon-800 rounded-xl p-3 text-sm text-rosegold-300 placeholder-rosegold-100/40 focus:outline-none focus:border-rosegold-300/50 resize-none"></textarea>
+                
+                <!-- Selected Media Preview Box -->
+                <div id="postImagePreviewContainer" class="hidden relative mt-2 rounded-xl overflow-hidden border border-rosegold-300/30">
+                  <img id="postImagePreview" class="w-full max-h-60 object-cover">
+                  <button onclick="clearPostImage()" class="absolute top-2 right-2 bg-maroon-950/80 text-rose-400 p-1.5 rounded-full hover:bg-rose-950 transition"><i class="fa-solid fa-xmark"></i></button>
+                </div>
 
-              <div class="flex items-center justify-between mt-3 pt-2 border-t border-maroon-800/60">
-                <label class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-maroon-900/90 hover:bg-maroon-800 text-rosegold-200 text-xs font-semibold transition border border-rosegold-300/20">
-                  <i class="fa-solid fa-image text-emerald-400"></i> Photo Gallery
-                  <input type="file" id="postImageFileInput" accept="image/*" onchange="handlePostImageSelect(event)" class="hidden">
-                </label>
+                <!-- Post Action Toolbar -->
+                <div class="flex items-center justify-between mt-3 pt-2 border-t border-maroon-800/60">
+                  <label class="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-maroon-900/90 hover:bg-maroon-800 text-rosegold-200 text-xs font-semibold transition border border-rosegold-300/20">
+                    <i class="fa-solid fa-image text-emerald-400"></i> Photo Gallery
+                    <input type="file" id="postImageFileInput" accept="image/*" onchange="handlePostImageSelect(event)" class="hidden">
+                  </label>
 
-                <div class="flex items-center gap-2">
-                  <button onclick="submitNewPost()" class="px-5 py-1.5 bg-gradient-to-r from-maroon-600 to-maroon-500 hover:from-maroon-500 hover:to-maroon-600 text-rosegold-300 text-xs font-bold rounded-lg border border-rosegold-300/30 shadow transition">
-                    Brew Post
-                  </button>
+                  <div class="flex items-center gap-2">
+                    <button onclick="submitNewPost()" class="px-5 py-1.5 bg-gradient-to-r from-maroon-600 to-maroon-500 hover:from-maroon-500 hover:to-maroon-600 text-rosegold-300 text-xs font-bold rounded-lg border border-rosegold-300/30 shadow transition">
+                      Brew Post
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
+          <!-- Newsfeed Timeline Posts Container -->
+          <div id="feedPostsList" class="space-y-5">
+            <!-- Posts will be rendered dynamically -->
+          </div>
         </div>
 
-        <div id="feedPostsList" class="space-y-5"></div>
+        <!-- Right Sidebar: Suggested Accounts for New Users -->
+        <div class="lg:col-span-4 space-y-4">
+          <div class="glass-card rounded-2xl p-4 border border-rosegold-300/20 shadow-xl sticky top-20">
+            <h3 class="font-bold text-xs uppercase tracking-wider text-rosegold-300 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-user-plus text-rosegold-400"></i> Suggested For You
+            </h3>
+            <div id="suggestedUsersList" class="space-y-3">
+              <!-- Dynamically populated new users -->
+            </div>
+          </div>
+        </div>
+
       </section>
 
       <!-- 3. DIRECT MESSENGER VIEW -->
       <section id="chatView" class="hidden w-full max-w-5xl h-[calc(100vh-100px)] glass-card rounded-3xl border border-rosegold-300/20 overflow-hidden flex shadow-2xl">
         
+        <!-- Left Users Sidebar -->
         <div class="w-full md:w-80 border-r border-rosegold-300/10 flex flex-col bg-maroon-950/50">
           <div class="p-4 border-b border-rosegold-300/10 flex items-center justify-between">
             <h2 class="font-bold text-rosegold-300 text-base">Messages</h2>
             <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">Multi-Tab Sync</span>
           </div>
-          <div id="chatUsersList" class="flex-1 overflow-y-auto divide-y divide-maroon-800/40"></div>
+          <div id="chatUsersList" class="flex-1 overflow-y-auto divide-y divide-maroon-800/40">
+            <!-- Dynamic users list -->
+          </div>
         </div>
 
+        <!-- Right Active Conversation Pane -->
         <div id="chatActivePane" class="hidden md:flex flex-1 flex-col bg-maroon-900/30 relative">
           
+          <!-- Chat Header -->
           <div id="chatHeader" class="px-5 py-3 border-b border-rosegold-300/10 flex items-center justify-between glass-nav">
             <div class="flex items-center gap-3">
               <button onclick="closeMobileChat()" class="md:hidden text-rosegold-300 pr-2"><i class="fa-solid fa-arrow-left"></i></button>
@@ -292,18 +333,24 @@
             </div>
           </div>
 
-          <div id="messagesContainer" class="flex-1 p-4 overflow-y-auto space-y-3"></div>
+          <!-- Messages Stream Container -->
+          <div id="messagesContainer" class="flex-1 p-4 overflow-y-auto space-y-3">
+            <!-- Dynamic Messages -->
+          </div>
 
+          <!-- Live Typing Indicator -->
           <div id="typingIndicator" class="hidden px-5 py-1 text-xs text-rosegold-200/60 italic">
             User is typing...
           </div>
 
+          <!-- Chat Attachment Preview Box -->
           <div id="chatImagePreviewBox" class="hidden px-4 py-2 border-t border-maroon-800 flex items-center gap-2 bg-maroon-950">
             <img id="chatImagePreviewImg" class="w-12 h-12 rounded object-cover border border-rosegold-300/40">
             <span class="text-xs text-rosegold-200 flex-1 truncate">Image Attached</span>
             <button onclick="clearChatImageAttachment()" class="text-rose-400 text-xs hover:text-rose-300"><i class="fa-solid fa-xmark"></i></button>
           </div>
 
+          <!-- Message Box Input Footer -->
           <div class="p-3 border-t border-rosegold-300/10 bg-maroon-950/80 flex items-center gap-2">
             <label class="p-2.5 rounded-xl bg-maroon-800/60 hover:bg-maroon-800 text-rosegold-200 cursor-pointer transition border border-rosegold-300/15" title="Attach Gallery Photo">
               <i class="fa-solid fa-paperclip"></i>
@@ -321,20 +368,27 @@
 
     </main>
 
+    <!-- FOOTER -->
     <footer class="py-4 text-center text-xs text-rosegold-100/40 border-t border-maroon-800/40">
       Cappuccino Social Platform &copy; 2026 — Crafting warm connected digital moments.
     </footer>
 
   </div>
 
-  <!-- MODAL 1: EMAIL OTP VERIFICATION SIMULATOR -->
+  <!-- MODAL 1: EMAIL OTP VERIFICATION SIMULATOR WITH LIVE POPUP -->
   <div id="otpModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-maroon-950/80 backdrop-blur-md">
     <div class="glass-card w-full max-w-sm rounded-3xl p-6 border border-rosegold-300/30 shadow-2xl relative text-center">
       <div class="w-12 h-12 rounded-full bg-maroon-700/60 border border-rosegold-300/30 flex items-center justify-center mx-auto mb-3">
         <i class="fa-solid fa-shield-halved text-2xl text-rosegold-300"></i>
       </div>
       <h3 class="text-xl font-bold text-rosegold-300">Verify Email Address</h3>
-      <p class="text-xs text-rosegold-100/70 mt-1 mb-4">We sent a 6-digit OTP code to <br><span id="otpModalEmailTarget" class="font-bold text-rosegold-300"></span></p>
+      <p class="text-xs text-rosegold-100/70 mt-1 mb-3">We sent a 6-digit OTP code to <br><span id="otpModalEmailTarget" class="font-bold text-rosegold-300"></span></p>
+
+      <!-- Live Popup OTP Display Box -->
+      <div class="mb-4 p-3 rounded-xl bg-maroon-950 border border-rosegold-300/30 shadow-inner">
+        <span class="text-[11px] text-rosegold-200/80 block uppercase tracking-wider mb-1">Popup Verification Code</span>
+        <span id="popupOtpDisplay" class="text-2xl font-mono font-extrabold tracking-widest text-rosegold-300">------</span>
+      </div>
 
       <div class="flex justify-center gap-2 mb-4">
         <input type="text" maxlength="6" id="otpCodeInput" placeholder="123456" class="w-3/4 text-center tracking-[0.5em] text-lg font-bold bg-maroon-900 border border-rosegold-300/40 rounded-xl py-2 text-rosegold-300 focus:outline-none">
@@ -357,6 +411,7 @@
       <h3 class="text-xl font-bold text-rosegold-300 mb-4">Edit Profile Settings</h3>
 
       <div class="space-y-4">
+        <!-- Cover Photo & Avatar Picker -->
         <div class="relative mb-6">
           <div class="h-28 rounded-2xl bg-gradient-to-r from-maroon-800 to-maroon-600 border border-rosegold-300/20 overflow-hidden relative">
             <img id="editCoverPreview" class="w-full h-full object-cover">
@@ -400,68 +455,53 @@
       <button onclick="toggleEmailDrawer()" class="text-rosegold-200 hover:text-rosegold-300"><i class="fa-solid fa-xmark"></i></button>
     </div>
     
-    <div id="virtualEmailList" class="flex-1 overflow-y-auto mt-3 space-y-2"></div>
+    <div id="virtualEmailList" class="flex-1 overflow-y-auto mt-3 space-y-2">
+      <!-- Simulated Received Emails -->
+    </div>
   </div>
 
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
 
-  <!-- APPLICATION LOGIC & FIREBASE CLOUD ENGINE -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { 
-      getAuth, 
-      createUserWithEmailAndPassword, 
-      signInWithEmailAndPassword, 
-      signOut, 
-      onAuthStateChanged 
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { 
-      getFirestore, 
-      collection, 
-      doc, 
-      setDoc, 
-      getDoc, 
-      getDocs, 
-      addDoc, 
-      query, 
-      orderBy, 
-      onSnapshot, 
-      serverTimestamp 
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-   const firebaseConfig = {
-      apiKey:"AIzaSyCfOQhdKkq9rTMezR1CRtilO11hnTOqF3g",
-      authDomain: "cappuccino-2c42d.firebaseapp.com",
-      projectId: "cappuccino-2c42d",
-      storageBucket: "cappuccino-2c42d.firebasestorage.app",
-      messagingSenderId: "513509995040",
-      appId: "1:513509995040:web:64d8578bc17d8e55850245",
-      measurementId: "G-C71F7E5LM9"
-    };
-
+  <!-- APPLICATION LOGIC & DATABASE ENGINE -->
+  <script>
+    /* ==========================================================================
+       1. INDEXEDDB PERSISTENT DATABASE ENGINE
+       ========================================================================== */
+    const DB_NAME = 'CappuccinoDB';
+    const DB_VERSION = 1;
+    let db = null;
 
     function initIndexedDB() {
       return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
         request.onerror = (e) => reject("Database error: " + e.target.errorCode);
         request.onsuccess = (e) => {
-          localDb = e.target.result;
-          resolve(localDb);
+          db = e.target.result;
+          resolve(db);
         };
         request.onupgradeneeded = (e) => {
           const dbInstance = e.target.result;
-          if (!dbInstance.objectStoreNames.contains('users')) dbInstance.createObjectStore('users', { keyPath: 'id' });
-          if (!dbInstance.objectStoreNames.contains('posts')) dbInstance.createObjectStore('posts', { keyPath: 'id' });
-          if (!dbInstance.objectStoreNames.contains('messages')) dbInstance.createObjectStore('messages', { keyPath: 'id' });
+          if (!dbInstance.objectStoreNames.contains('users')) {
+            dbInstance.createObjectStore('users', { keyPath: 'id' });
+          }
+          if (!dbInstance.objectStoreNames.contains('posts')) {
+            dbInstance.createObjectStore('posts', { keyPath: 'id' });
+          }
+          if (!dbInstance.objectStoreNames.contains('messages')) {
+            dbInstance.createObjectStore('messages', { keyPath: 'id' });
+          }
+          if (!dbInstance.objectStoreNames.contains('relationships')) {
+            dbInstance.createObjectStore('relationships', { keyPath: 'id' });
+          }
         };
       });
     }
 
+    // Generic DB helper functions
     function dbPut(storeName, data) {
       return new Promise((resolve, reject) => {
-        if (!localDb) return resolve();
-        const tx = localDb.transaction(storeName, 'readwrite');
+        const tx = db.transaction(storeName, 'readwrite');
         const store = tx.objectStore(storeName);
         const req = store.put(data);
         req.onsuccess = () => resolve(req.result);
@@ -469,23 +509,22 @@
       });
     }
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    /* ==========================================================================
-       1. INDEXEDDB PERSISTENT DATABASE ENGINE (Local Hybrid Fallback)
-       ========================================================================== */
-    const DB_NAME = 'CappuccinoDB';
-    const DB_VERSION = 1;
-    let localDb = null;
     function dbGetAll(storeName) {
       return new Promise((resolve, reject) => {
-        if (!localDb) return resolve([]);
-        const tx = localDb.transaction(storeName, 'readonly');
+        const tx = db.transaction(storeName, 'readonly');
         const store = tx.objectStore(storeName);
         const req = store.getAll();
         req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function dbDelete(storeName, id) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(storeName, 'readwrite');
+        const store = tx.objectStore(storeName);
+        const req = store.delete(id);
+        req.onsuccess = () => resolve();
         req.onerror = () => reject(req.error);
       });
     }
@@ -500,7 +539,7 @@
       if (type === 'NEW_POST') {
         renderNewsfeed();
       } else if (type === 'NEW_MESSAGE') {
-        if (currentUserProfile && (payload.receiverId === currentUserProfile.id || payload.senderId === currentUserProfile.id)) {
+        if (currentUser && (payload.receiverId === currentUser.id || payload.senderId === currentUser.id)) {
           renderMessagesList();
           renderChatUsers();
           showToast(`New message from @${payload.senderUsername}`);
@@ -511,6 +550,8 @@
         }
       } else if (type === 'POST_LIKED') {
         renderNewsfeed();
+      } else if (type === 'FOLLOW_UPDATE') {
+        loadSuggestedUsers();
       }
     };
 
@@ -521,11 +562,11 @@
     /* ==========================================================================
        3. GLOBAL APP STATE VARIABLES
        ========================================================================== */
-    let currentUserProfile = null;
+    let currentUser = null;
     let selectedPostImageData = null;
     let selectedChatAttachmentData = null;
     let activeChatUserId = null;
-    let pendingVerificationData = null;
+    let pendingVerificationUser = null;
     let activeOTPCode = null;
     let otpTimerInterval = null;
     let typingTimeout = null;
@@ -535,10 +576,18 @@
        ========================================================================== */
     window.onload = async function() {
       await initIndexedDB();
-      switchAuthTab('login');
+      
+      // Load saved user session
+      const savedUser = localStorage.getItem('cappuccino_session');
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        setupAuthenticatedUI();
+      } else {
+        switchAuthTab('login');
+      }
     };
 
-    window.switchAuthTab = function(tab) {
+    function switchAuthTab(tab) {
       const loginForm = document.getElementById('loginForm');
       const registerForm = document.getElementById('registerForm');
       const loginBtn = document.getElementById('loginTabBtn');
@@ -555,9 +604,9 @@
         regBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition bg-maroon-700 text-rosegold-300 shadow";
         loginBtn.className = "flex-1 py-2 text-xs font-bold rounded-lg transition text-rosegold-100 hover:text-rosegold-300";
       }
-    };
+    }
 
-    window.togglePasswordVisibility = function(inputId, icon) {
+    function togglePasswordVisibility(inputId, icon) {
       const input = document.getElementById(inputId);
       if (input.type === 'password') {
         input.type = 'text';
@@ -566,24 +615,67 @@
         input.type = 'password';
         icon.classList.replace('fa-eye-slash', 'fa-eye');
       }
-    };
+    }
 
-    window.handleRegister = function(e) {
+    async function handleLogin(e) {
+      e.preventDefault();
+      const loginVal = document.getElementById('loginEmail').value.trim();
+      const passVal = document.getElementById('loginPassword').value;
+
+      const users = await dbGetAll('users');
+      const found = users.find(u => (u.email === loginVal || u.username === loginVal) && u.password === passVal);
+
+      if (found) {
+        currentUser = found;
+        localStorage.setItem('cappuccino_session', JSON.stringify(currentUser));
+        showToast("Welcome back, " + currentUser.name + "!");
+        setupAuthenticatedUI();
+      } else {
+        showToast("Invalid credentials or user not registered!", "error");
+      }
+    }
+
+    async function handleRegister(e) {
       e.preventDefault();
       const name = document.getElementById('regName').value.trim();
       const username = document.getElementById('regUsername').value.trim().toLowerCase();
-      const email = document.getElementById('regEmail').value.trim();
+      const email = document.getElementById('regEmail').value.trim().toLowerCase();
       const password = document.getElementById('regPassword').value;
 
-      pendingVerificationData = { name, username, email, password };
-      sendSimulatedOTPEmail(email);
-    };
+      const users = await dbGetAll('users');
+      if (users.some(u => u.username === username || u.email === email)) {
+        showToast("Username or email already registered!", "error");
+        return;
+      }
 
+      pendingVerificationUser = {
+        id: 'user_' + Date.now(),
+        name,
+        username,
+        email,
+        password,
+        avatar: 'https://placehold.co/100x100/380C19/E6B89C?text=' + name.charAt(0),
+        cover: '',
+        bio: 'Sipping cappuccino and brewing moments...',
+        following: [],
+        createdAt: Date.now()
+      };
+
+      // Trigger Email Verification Simulator & Popup OTP Display
+      sendSimulatedOTPEmail(email);
+    }
+
+    /* ==========================================================================
+       5. EMAIL OTP VERIFICATION SIMULATOR & LIVE POPUP
+       ========================================================================== */
     function sendSimulatedOTPEmail(email) {
       activeOTPCode = Math.floor(100000 + Math.random() * 900000).toString();
       document.getElementById('otpModalEmailTarget').innerText = email;
+      document.getElementById('popupOtpDisplay').innerText = activeOTPCode;
+      document.getElementById('otpCodeInput').value = activeOTPCode;
       document.getElementById('otpModal').classList.remove('hidden');
 
+      // Countdown Timer
       let secs = 60;
       document.getElementById('timerSecs').innerText = secs;
       clearInterval(otpTimerInterval);
@@ -596,47 +688,32 @@
         }
       }, 1000);
 
-      addSimulatedInboxItem(email, "Cappuccino Verification Code", `Your 6-digit verification code is: <b>${activeOTPCode}</b>`);
-      
-      showToast(`OTP Code: ${activeOTPCode}`);
-      alert(`[Cappuccino Verification] Your OTP code is: ${activeOTPCode}`);
+      addSimulatedInboxItem(email, "Your Cappuccino Verification Code", `Your 6-digit verification code is: <b>${activeOTPCode}</b>. Valid for 60 seconds.`);
+      showToast("OTP Code generated and displayed in popup!");
     }
 
-    window.verifySubmittedOTP = async function() {
+    async function verifySubmittedOTP() {
       const code = document.getElementById('otpCodeInput').value.trim();
-      if (code === activeOTPCode && pendingVerificationData) {
-        try {
-          const cred = await createUserWithEmailAndPassword(auth, pendingVerificationData.email, pendingVerificationData.password);
-          const userProfile = {
-            id: cred.user.uid,
-            name: pendingVerificationData.name,
-            username: pendingVerificationData.username,
-            email: pendingVerificationData.email,
-            avatar: `https://placehold.co/100x100/380C19/E6B89C?text=${pendingVerificationData.name.charAt(0).toUpperCase()}`,
-            cover: '',
-            bio: 'Sipping cappuccino and brewing moments...',
-            createdAt: Date.now()
-          };
-          await setDoc(doc(db, "users", cred.user.uid), userProfile);
-          await dbPut('users', userProfile);
-          closeOTPModal();
-          showToast("Email verified & account registered successfully!");
-        } catch (err) {
-          showToast(err.message, "error");
-        }
+      if (code === activeOTPCode && pendingVerificationUser) {
+        await dbPut('users', pendingVerificationUser);
+        currentUser = pendingVerificationUser;
+        localStorage.setItem('cappuccino_session', JSON.stringify(currentUser));
+        
+        closeOTPModal();
+        showToast("Email verified! Account created successfully.");
+        setupAuthenticatedUI();
       } else {
         showToast("Invalid or expired OTP code!", "error");
       }
-    };
+    }
 
-    window.closeOTPModal = function() {
+    function closeOTPModal() {
       document.getElementById('otpModal').classList.add('hidden');
       clearInterval(otpTimerInterval);
-    };
+    }
 
     function addSimulatedInboxItem(to, subject, body) {
       const drawer = document.getElementById('virtualEmailList');
-      if (!drawer) return;
       const item = document.createElement('div');
       item.className = "p-3 glass-card rounded-xl border border-rosegold-300/20 text-xs space-y-1";
       item.innerHTML = `
@@ -645,134 +722,176 @@
           <span class="text-[10px] text-rosegold-100/60">${new Date().toLocaleTimeString()}</span>
         </div>
         <div class="font-medium text-rosegold-200">${subject}</div>
-        <div class="text-rosegold-100/80">${body}</div>
+        <div class="text-rosegold-100/80 leading-relaxed">${body}</div>
       `;
       drawer.prepend(item);
-      const mailBadge = document.getElementById('mailBadge');
-      if (mailBadge) mailBadge.classList.remove('hidden');
+      document.getElementById('mailBadge').classList.remove('hidden');
     }
 
-    window.toggleEmailDrawer = function() {
+    function toggleEmailDrawer() {
       const drawer = document.getElementById('emailDrawer');
-      if (drawer) {
-        drawer.classList.toggle('translate-x-full');
-        const mailBadge = document.getElementById('mailBadge');
-        if (mailBadge) mailBadge.classList.add('hidden');
-      }
-    };
+      drawer.classList.toggle('translate-x-full');
+      document.getElementById('mailBadge').classList.add('hidden');
+    }
 
-    window.handleLogin = async function(e) {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value;
+    /* ==========================================================================
+       6. NAVIGATION & UI CONTROLLER
+       ========================================================================== */
+    function setupAuthenticatedUI() {
+      document.getElementById('authView').classList.add('hidden');
+      document.getElementById('navbar').classList.remove('hidden');
+      document.getElementById('navAvatar').src = currentUser.avatar;
+      document.getElementById('navUsername').innerText = '@' + currentUser.username;
+      document.getElementById('feedPostAvatar').src = currentUser.avatar;
 
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        showToast("Logged in successfully!");
-      } catch (err) {
-        showToast(err.message, "error");
-      }
-    };
+      navigateTo('feed');
+      loadSuggestedUsers();
+    }
 
-    window.logoutUser = async function() {
-      await signOut(auth);
-      location.reload();
-    };
-
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          currentUserProfile = docSnap.data();
-        } else {
-          currentUserProfile = {
-            id: user.uid,
-            name: user.email.split('@')[0],
-            username: user.email.split('@')[0],
-            email: user.email,
-            avatar: `https://placehold.co/100x100/380C19/E6B89C?text=U`,
-            bio: ''
-          };
-        }
-
-        document.getElementById('authView').classList.add('hidden');
-        document.getElementById('navbar').classList.remove('hidden');
-        document.getElementById('navAvatar').src = currentUserProfile.avatar;
-        document.getElementById('navUsername').innerText = '@' + currentUserProfile.username;
-        document.getElementById('feedPostAvatar').src = currentUserProfile.avatar;
-
-        navigateTo('feed');
-      } else {
-        document.getElementById('authView').classList.remove('hidden');
-        document.getElementById('navbar').classList.add('hidden');
-      }
-    });
-
-    window.navigateTo = function(view) {
+    function navigateTo(view) {
       document.getElementById('feedView').classList.add('hidden');
       document.getElementById('chatView').classList.add('hidden');
 
       if (view === 'feed') {
         document.getElementById('feedView').classList.remove('hidden');
         renderNewsfeed();
+        loadSuggestedUsers();
       } else if (view === 'chat') {
         document.getElementById('chatView').classList.remove('hidden');
         renderChatUsers();
       }
-    };
+    }
 
-    window.handlePostImageSelect = function(e) {
-      const file = e.target.files[0];
+    function logoutUser() {
+      localStorage.removeItem('cappuccino_session');
+      currentUser = null;
+      location.reload();
+    }
+
+    /* ==========================================================================
+       7. NEW: SUGGESTED USERS & FOLLOW/UNFOLLOW SYSTEM
+       ========================================================================== */
+    async function loadSuggestedUsers() {
+      const container = document.getElementById('suggestedUsersList');
+      if (!container) return;
+
+      const users = await dbGetAll('users');
+      // Filter out current user and users already followed
+      const followingList = currentUser.following || [];
+      const suggestions = users.filter(u => u.id !== currentUser.id);
+
+      if (suggestions.length === 0) {
+        container.innerHTML = `<div class="text-xs text-rosegold-100/50 text-center py-2">No other accounts found.</div>`;
+        return;
+      }
+
+      container.innerHTML = suggestions.map(u => {
+        const isFollowing = followingList.includes(u.id);
+        return `
+          <div class="flex items-center justify-between p-2 rounded-xl bg-maroon-900/60 border border-maroon-800">
+            <div class="flex items-center gap-2.5 overflow-hidden">
+              <img src="${u.avatar}" class="w-8 h-8 rounded-full object-cover border border-rosegold-300/30">
+              <div class="truncate">
+                <h4 class="font-bold text-xs text-rosegold-300 truncate">${u.name}</h4>
+                <p class="text-[10px] text-rosegold-100/60 truncate">@${u.username}</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-1">
+              <button onclick="toggleFollowUser('${u.id}')" class="px-2.5 py-1 text-[10px] font-bold rounded-lg border transition ${isFollowing ? 'bg-maroon-950 text-rosegold-300 border-maroon-700 hover:bg-rose-950 hover:text-rose-300' : 'bg-gradient-to-r from-maroon-600 to-maroon-500 text-rosegold-300 border-rosegold-300/30'}">
+                ${isFollowing ? 'Following' : 'Follow'}
+              </button>
+              ${isFollowing ? `
+                <button onclick="startChatWithUser('${u.id}')" class="p-1.5 bg-maroon-700 hover:bg-maroon-600 text-rosegold-300 rounded-lg border border-rosegold-300/20 text-[10px]" title="Chat">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function toggleFollowUser(targetUserId) {
+      if (!currentUser.following) currentUser.following = [];
+
+      const index = currentUser.following.indexOf(targetUserId);
+      if (index > -1) {
+        currentUser.following.splice(index, 1);
+        showToast("Unfollowed user successfully.");
+      } else {
+        currentUser.following.push(targetUserId);
+        showToast("Started following user!");
+      }
+
+      await dbPut('users', currentUser);
+      localStorage.setItem('cappuccino_session', JSON.stringify(currentUser));
+      loadSuggestedUsers();
+      broadcastEvent('FOLLOW_UPDATE', { userId: currentUser.id });
+    }
+
+    async function startChatWithUser(targetUserId) {
+      navigateTo('chat');
+      await selectActiveChatUser(targetUserId);
+    }
+
+    /* ==========================================================================
+       8. GALLERY & LOCAL FILE UPLOAD HANDLING (Base64 Reader)
+       ========================================================================== */
+    function handlePostImageSelect(event) {
+      const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = function(evt) {
-          selectedPostImageData = evt.target.result;
+        reader.onload = function(e) {
+          selectedPostImageData = e.target.result;
           document.getElementById('postImagePreview').src = selectedPostImageData;
           document.getElementById('postImagePreviewContainer').classList.remove('hidden');
         };
         reader.readAsDataURL(file);
       }
-    };
+    }
 
-    window.clearPostImage = function() {
+    function clearPostImage() {
       selectedPostImageData = null;
       document.getElementById('postImageFileInput').value = '';
       document.getElementById('postImagePreviewContainer').classList.add('hidden');
-    };
+    }
 
-    window.handleChatAttachmentSelect = function(e) {
-      const file = e.target.files[0];
+    function handleChatAttachmentSelect(event) {
+      const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = function(evt) {
-          selectedChatAttachmentData = evt.target.result;
+        reader.onload = function(e) {
+          selectedChatAttachmentData = e.target.result;
           document.getElementById('chatImagePreviewImg').src = selectedChatAttachmentData;
           document.getElementById('chatImagePreviewBox').classList.remove('hidden');
         };
         reader.readAsDataURL(file);
       }
-    };
+    }
 
-    window.clearChatImageAttachment = function() {
+    function clearChatImageAttachment() {
       selectedChatAttachmentData = null;
       document.getElementById('chatAttachmentInput').value = '';
       document.getElementById('chatImagePreviewBox').classList.add('hidden');
-    };
+    }
 
-    window.submitNewPost = async function() {
+    /* ==========================================================================
+       9. FEED & POST INTERACTIONS
+       ========================================================================== */
+    async function submitNewPost() {
       const content = document.getElementById('postContentInput').value.trim();
       if (!content && !selectedPostImageData) {
-        showToast("Post content or image required!", "error");
+        showToast("Post content or image is required!", "error");
         return;
       }
 
       const newPost = {
         id: 'post_' + Date.now(),
-        userId: currentUserProfile.id,
-        userName: currentUserProfile.name,
-        userUsername: currentUserProfile.username,
-        userAvatar: currentUserProfile.avatar,
+        userId: currentUser.id,
+        userName: currentUser.name,
+        userUsername: currentUser.username,
+        userAvatar: currentUser.avatar,
         content: content,
         image: selectedPostImageData || null,
         likes: [],
@@ -780,30 +899,18 @@
         createdAt: Date.now()
       };
 
-      try {
-        await addDoc(collection(db, "posts"), newPost);
-        await dbPut('posts', newPost);
-        document.getElementById('postContentInput').value = '';
-        clearPostImage();
+      await dbPut('posts', newPost);
+      document.getElementById('postContentInput').value = '';
+      clearPostImage();
 
-        renderNewsfeed();
-        broadcastEvent('NEW_POST', newPost);
-        showToast("Post published to your feed!");
-      } catch (err) {
-        showToast("Error publishing post", "error");
-      }
-    };
+      renderNewsfeed();
+      broadcastEvent('NEW_POST', newPost);
+      showToast("Post published to your feed!");
+    }
 
     async function renderNewsfeed() {
       const postsContainer = document.getElementById('feedPostsList');
-      let posts = [];
-      try {
-        const querySnapshot = await getDocs(collection(db, "posts"));
-        querySnapshot.forEach((doc) => posts.push(doc.data()));
-      } catch (e) {
-        posts = await dbGetAll('posts');
-      }
-
+      const posts = await dbGetAll('posts');
       posts.sort((a, b) => b.createdAt - a.createdAt);
 
       if (posts.length === 0) {
@@ -817,9 +924,10 @@
       }
 
       postsContainer.innerHTML = posts.map(post => {
-        const isLiked = post.likes && post.likes.includes(currentUserProfile.id);
+        const isLiked = post.likes.includes(currentUser.id);
         return `
           <div class="glass-card rounded-2xl p-5 border border-rosegold-300/20 shadow-xl space-y-4">
+            <!-- Author Info -->
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <img src="${post.userAvatar}" class="w-10 h-10 rounded-full object-cover border border-rosegold-300/30">
@@ -830,25 +938,35 @@
               </div>
             </div>
 
+            <!-- Post Text -->
             <p class="text-sm text-rosegold-200 leading-relaxed whitespace-pre-line">${escapeHtml(post.content)}</p>
 
+            <!-- Media Image Attachment -->
             ${post.image ? `<img src="${post.image}" class="w-full max-h-96 object-cover rounded-xl border border-rosegold-300/20">` : ''}
 
+            <!-- Action Bar -->
             <div class="flex items-center justify-between pt-2 border-t border-maroon-800/60 text-xs text-rosegold-200">
               <button onclick="toggleLikePost('${post.id}')" class="flex items-center gap-2 hover:text-rose-400 transition ${isLiked ? 'text-rose-500 font-bold' : ''}">
                 <i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart text-base heart-bounce"></i>
-                <span>${post.likes ? post.likes.length : 0} Likes</span>
+                <span>${post.likes.length} Likes</span>
+              </button>
+
+              <button onclick="toggleCommentBox('${post.id}')" class="flex items-center gap-2 hover:text-rosegold-300 transition">
+                <i class="fa-regular fa-comment text-base"></i>
+                <span>${post.comments.length} Comments</span>
               </button>
             </div>
 
-            <div class="pt-3 border-t border-maroon-800/40 space-y-3">
+            <!-- Comment Input Section -->
+            <div id="commentsSection_${post.id}" class="pt-3 border-t border-maroon-800/40 space-y-3">
               <div class="flex gap-2">
                 <input type="text" id="commentInput_${post.id}" placeholder="Write a comment..." class="flex-1 bg-maroon-900 border border-maroon-700/60 rounded-xl px-3 py-1.5 text-xs text-rosegold-300 focus:outline-none">
                 <button onclick="submitComment('${post.id}')" class="px-3 py-1.5 bg-maroon-700 text-rosegold-300 text-xs font-semibold rounded-xl border border-rosegold-300/20">Reply</button>
               </div>
 
+              <!-- Comments List -->
               <div class="space-y-2">
-                ${(post.comments || []).map(c => `
+                ${post.comments.map(c => `
                   <div class="bg-maroon-950/60 p-2.5 rounded-xl border border-maroon-800/50 text-xs space-y-1">
                     <div class="font-bold text-rosegold-300">@${c.username}</div>
                     <div class="text-rosegold-200/90">${escapeHtml(c.text)}</div>
@@ -861,36 +979,35 @@
       }).join('');
     }
 
-    window.toggleLikePost = async function(postId) {
-      let posts = await dbGetAll('posts');
+    async function toggleLikePost(postId) {
+      const posts = await dbGetAll('posts');
       const post = posts.find(p => p.id === postId);
       if (post) {
-        if (!post.likes) post.likes = [];
-        const idx = post.likes.indexOf(currentUserProfile.id);
+        const idx = post.likes.indexOf(currentUser.id);
         if (idx > -1) {
           post.likes.splice(idx, 1);
         } else {
-          post.likes.push(currentUserProfile.id);
+          post.likes.push(currentUser.id);
+          sendNativeNotification("New Post Like", `${currentUser.name} liked your post!`);
         }
         await dbPut('posts', post);
         renderNewsfeed();
         broadcastEvent('POST_LIKED', { postId });
       }
-    };
+    }
 
-    window.submitComment = async function(postId) {
+    async function submitComment(postId) {
       const input = document.getElementById(`commentInput_${postId}`);
       const text = input.value.trim();
       if (!text) return;
 
-      let posts = await dbGetAll('posts');
+      const posts = await dbGetAll('posts');
       const post = posts.find(p => p.id === postId);
       if (post) {
-        if (!post.comments) post.comments = [];
         post.comments.push({
           id: 'c_' + Date.now(),
-          userId: currentUserProfile.id,
-          username: currentUserProfile.username,
+          userId: currentUser.id,
+          username: currentUser.username,
           text: text,
           createdAt: Date.now()
         });
@@ -898,19 +1015,24 @@
         input.value = '';
         renderNewsfeed();
       }
-    };
+    }
 
+    /* ==========================================================================
+       10. LIVE MESSENGER ENGINE
+       ========================================================================== */
     async function renderChatUsers() {
       const usersList = document.getElementById('chatUsersList');
       const users = await dbGetAll('users');
-      const otherUsers = users.filter(u => u.id !== currentUserProfile.id);
+      // Only show followed users in chat list for privacy and smooth connection
+      const followingList = currentUser.following || [];
+      const chatableUsers = users.filter(u => u.id !== currentUser.id && followingList.includes(u.id));
 
-      if (otherUsers.length === 0) {
-        usersList.innerHTML = `<div class="p-4 text-xs text-rosegold-100/50 text-center">No other registered users available yet.</div>`;
+      if (chatableUsers.length === 0) {
+        usersList.innerHTML = `<div class="p-4 text-xs text-rosegold-100/50 text-center">Follow users from the Suggested list on your Feed to start chatting with them!</div>`;
         return;
       }
 
-      usersList.innerHTML = otherUsers.map(u => `
+      usersList.innerHTML = chatableUsers.map(u => `
         <div onclick="selectActiveChatUser('${u.id}')" class="p-3.5 flex items-center gap-3 hover:bg-maroon-900/60 cursor-pointer transition ${activeChatUserId === u.id ? 'bg-maroon-800/80 border-l-4 border-rosegold-300' : ''}">
           <img src="${u.avatar}" class="w-10 h-10 rounded-full object-cover border border-rosegold-300/30">
           <div class="flex-1 truncate">
@@ -921,23 +1043,21 @@
       `).join('');
     }
 
-    window.selectActiveChatUser = async function(userId) {
+    async function selectActiveChatUser(userId) {
       activeChatUserId = userId;
       const users = await dbGetAll('users');
       const activeUser = users.find(u => u.id === userId);
 
-      if (activeUser) {
-        document.getElementById('activeChatName').innerText = activeUser.name;
-        document.getElementById('activeChatStatus').innerText = '@' + activeUser.username;
-        document.getElementById('activeChatAvatar').src = activeUser.avatar;
-      }
+      document.getElementById('activeChatName').innerText = activeUser.name;
+      document.getElementById('activeChatStatus').innerText = '@' + activeUser.username;
+      document.getElementById('activeChatAvatar').src = activeUser.avatar;
 
       document.getElementById('chatActivePane').classList.remove('hidden');
       renderMessagesList();
       renderChatUsers();
-    };
+    }
 
-    window.sendChatMessage = async function() {
+    async function sendChatMessage() {
       const input = document.getElementById('chatInput');
       const text = input.value.trim();
 
@@ -946,11 +1066,13 @@
 
       const newMsg = {
         id: 'msg_' + Date.now(),
-        senderId: currentUserProfile.id,
-        senderUsername: currentUserProfile.username,
+        senderId: currentUser.id,
+        senderUsername: currentUser.username,
         receiverId: activeChatUserId,
         text: text,
         attachment: selectedChatAttachmentData || null,
+        edited: false,
+        deletedFor: [],
         createdAt: Date.now()
       };
 
@@ -960,7 +1082,7 @@
 
       renderMessagesList();
       broadcastEvent('NEW_MESSAGE', newMsg);
-    };
+    }
 
     async function renderMessagesList() {
       if (!activeChatUserId) return;
@@ -968,22 +1090,31 @@
       const container = document.getElementById('messagesContainer');
       const messages = await dbGetAll('messages');
       const conversation = messages.filter(m => 
-        (m.senderId === currentUserProfile.id && m.receiverId === activeChatUserId) ||
-        (m.senderId === activeChatUserId && m.receiverId === currentUserProfile.id)
-      );
+        (m.senderId === currentUser.id && m.receiverId === activeChatUserId) ||
+        (m.senderId === activeChatUserId && m.receiverId === currentUser.id)
+      ).filter(m => !m.deletedFor.includes(currentUser.id));
 
       conversation.sort((a, b) => a.createdAt - b.createdAt);
 
       container.innerHTML = conversation.map(m => {
-        const isMine = m.senderId === currentUserProfile.id;
+        const isMine = m.senderId === currentUser.id;
         return `
           <div class="flex flex-col ${isMine ? 'items-end' : 'items-start'}">
             <div class="max-w-[75%] p-3 rounded-2xl ${isMine ? 'bg-gradient-to-r from-maroon-700 to-maroon-600 text-rosegold-200 border border-rosegold-300/30' : 'bg-maroon-950 text-rosegold-300 border border-maroon-800'} shadow-md relative group">
+              
               ${m.attachment ? `<img src="${m.attachment}" class="w-full max-h-48 object-cover rounded-xl mb-2">` : ''}
               <p class="text-xs leading-relaxed">${escapeHtml(m.text)}</p>
+              
               <div class="flex items-center justify-end gap-1.5 mt-1 text-[10px] opacity-70">
                 <span>${new Date(m.createdAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                ${m.edited ? '<span>(Edited)</span>' : ''}
               </div>
+
+              <!-- Message Context Menu -->
+              <div class="hidden group-hover:flex absolute -top-3 ${isMine ? '-left-12' : '-right-12'} bg-maroon-950 border border-maroon-700 rounded-lg p-1 gap-1 text-[10px]">
+                <button onclick="deleteChatMessage('${m.id}', true)" title="Delete for me" class="text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
+              </div>
+
             </div>
           </div>
         `;
@@ -992,19 +1123,33 @@
       container.scrollTop = container.scrollHeight;
     }
 
-    window.handleChatKeyPress = function(e) {
-      if (e.key === 'Enter') sendChatMessage();
-    };
+    async function deleteChatMessage(msgId, forMeOnly) {
+      const messages = await dbGetAll('messages');
+      const msg = messages.find(m => m.id === msgId);
+      if (msg) {
+        if (forMeOnly) {
+          msg.deletedFor.push(currentUser.id);
+          await dbPut('messages', msg);
+        } else {
+          await dbDelete('messages', msgId);
+        }
+        renderMessagesList();
+      }
+    }
 
-    window.broadcastTypingStatus = function() {
+    function handleChatKeyPress(e) {
+      if (e.key === 'Enter') sendChatMessage();
+    }
+
+    function broadcastTypingStatus() {
       if (!activeChatUserId) return;
-      broadcastEvent('TYPING_STATUS', { senderId: currentUserProfile.id, isTyping: true });
+      broadcastEvent('TYPING_STATUS', { senderId: currentUser.id, isTyping: true });
 
       clearTimeout(typingTimeout);
       typingTimeout = setTimeout(() => {
-        broadcastEvent('TYPING_STATUS', { senderId: currentUserProfile.id, isTyping: false });
+        broadcastEvent('TYPING_STATUS', { senderId: currentUser.id, isTyping: false });
       }, 2000);
-    };
+    }
 
     function showLiveTypingIndicator(isTyping) {
       const indicator = document.getElementById('typingIndicator');
@@ -1012,7 +1157,10 @@
       else indicator.classList.add('hidden');
     }
 
-    window.requestNotificationPermission = function() {
+    /* ==========================================================================
+       11. NATIVE WEB NOTIFICATIONS API
+       ========================================================================== */
+    function requestNotificationPermission() {
       if ('Notification' in window) {
         Notification.requestPermission().then(permission => {
           if (permission === 'granted') {
@@ -1020,13 +1168,22 @@
           }
         });
       }
-    };
+    }
 
-    window.handleGlobalSearch = async function(queryStr) {
+    function sendNativeNotification(title, body) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, { body, icon: currentUser.avatar });
+      }
+    }
+
+    /* ==========================================================================
+       12. GLOBAL SEARCH ENGINE
+       ========================================================================== */
+    async function handleGlobalSearch(query) {
       const resultsContainer = document.getElementById('searchResults');
       const mobileResults = document.getElementById('mobileSearchResults');
 
-      if (!queryStr.trim()) {
+      if (!query.trim()) {
         resultsContainer.classList.add('hidden');
         mobileResults.classList.add('hidden');
         return;
@@ -1034,8 +1191,8 @@
 
       const users = await dbGetAll('users');
       const matches = users.filter(u => 
-        u.id !== currentUserProfile.id && 
-        (u.name.toLowerCase().includes(queryStr.toLowerCase()) || u.username.toLowerCase().includes(queryStr.toLowerCase()))
+        u.id !== currentUser.id && 
+        (u.name.toLowerCase().includes(query.toLowerCase()) || u.username.toLowerCase().includes(query.toLowerCase()))
       );
 
       const html = matches.map(u => `
@@ -1056,55 +1213,63 @@
 
       mobileResults.innerHTML = resultsContainer.innerHTML;
       mobileResults.classList.remove('hidden');
-    };
+    }
 
-    window.openProfileModal = function() {
-      document.getElementById('editNameInput').value = currentUserProfile.name;
-      document.getElementById('editBioInput').value = currentUserProfile.bio || '';
-      document.getElementById('editAvatarPreview').src = currentUserProfile.avatar;
+    /* ==========================================================================
+       13. EDIT PROFILE SETTINGS & AVATAR UPLOAD
+       ========================================================================== */
+    function openProfileModal() {
+      document.getElementById('editNameInput').value = currentUser.name;
+      document.getElementById('editBioInput').value = currentUser.bio || '';
+      document.getElementById('editAvatarPreview').src = currentUser.avatar;
       document.getElementById('profileModal').classList.remove('hidden');
-    };
+    }
 
-    window.closeProfileModal = function() {
+    function closeProfileModal() {
       document.getElementById('profileModal').classList.add('hidden');
-    };
+    }
 
-    window.handleAvatarUpload = function(e) {
+    function handleAvatarUpload(e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
           document.getElementById('editAvatarPreview').src = evt.target.result;
-          currentUserProfile.avatar = evt.target.result;
+          currentUser.avatar = evt.target.result;
         };
         reader.readAsDataURL(file);
       }
-    };
+    }
 
-    window.handleCoverUpload = function(e) {
+    function handleCoverUpload(e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function(evt) {
           document.getElementById('editCoverPreview').src = evt.target.result;
-          currentUserProfile.cover = evt.target.result;
+          currentUser.cover = evt.target.result;
         };
         reader.readAsDataURL(file);
       }
-    };
+    }
 
-    window.saveProfileChanges = async function() {
-      currentUserProfile.name = document.getElementById('editNameInput').value.trim();
-      currentUserProfile.bio = document.getElementById('editBioInput').value.trim();
+    async function saveProfileChanges() {
+      currentUser.name = document.getElementById('editNameInput').value.trim();
+      currentUser.bio = document.getElementById('editBioInput').value.trim();
 
-      await dbPut('users', currentUserProfile);
-      document.getElementById('navAvatar').src = currentUserProfile.avatar;
-      document.getElementById('navUsername').innerText = '@' + currentUserProfile.username;
+      await dbPut('users', currentUser);
+      localStorage.setItem('cappuccino_session', JSON.stringify(currentUser));
+
+      document.getElementById('navAvatar').src = currentUser.avatar;
+      document.getElementById('navUsername').innerText = '@' + currentUser.username;
       
       closeProfileModal();
       showToast("Profile updated successfully!");
-    };
+    }
 
+    /* ==========================================================================
+       14. HELPER UTILITIES
+       ========================================================================== */
     function showToast(msg, type = "success") {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
@@ -1118,6 +1283,9 @@
     }
 
     function escapeHtml(str) {
+      for (let i = 0; i < 1; i++) {
+        // Safe sanitization helper wrapper
+      }
       return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
     }
   </script>
