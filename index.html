@@ -125,7 +125,7 @@
 
         <div class="relative flex-1 max-w-md hidden md:block">
           <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-rosegold-100/60"></i>
-          <input type="text" id="searchInput" oninput="handleGlobalSearch(this.value)" placeholder="Search public users, friends..." class="w-full bg-maroon-900/90 border border-maroon-700/60 rounded-full pl-10 pr-4 py-2 text-sm text-rosegold-300 placeholder-rosegold-100/40 focus:outline-none focus:border-rosegold-300/60 transition">
+          <input type="text" id="searchInput" oninput="handleGlobalSearch(this.value)" placeholder="Search public users..." class="w-full bg-maroon-900/90 border border-maroon-700/60 rounded-full pl-10 pr-4 py-2 text-sm text-rosegold-300 placeholder-rosegold-100/40 focus:outline-none focus:border-rosegold-300/60 transition">
           <div id="searchResults" class="hidden absolute left-0 right-0 top-12 glass-card rounded-2xl p-2 shadow-2xl border border-rosegold-300/20 max-h-80 overflow-y-auto z-50"></div>
         </div>
 
@@ -260,11 +260,11 @@
           <div id="feedPostsList" class="space-y-5"></div>
         </div>
 
-        <!-- Right Sidebar: Suggested For You (Excluding My Own Account) -->
+        <!-- Right Sidebar: Suggested For You (Public Users Directory) -->
         <div class="lg:col-span-4 space-y-4">
           <div class="glass-card rounded-2xl p-4 border border-rosegold-300/20 shadow-xl sticky top-20">
             <h3 class="font-bold text-xs uppercase tracking-wider text-rosegold-300 mb-3 flex items-center gap-2">
-              <i class="fa-solid fa-user-plus text-rosegold-400"></i> Suggested For You
+              <i class="fa-solid fa-user-plus text-rosegold-400"></i> Suggested For You (Public)
             </h3>
             <div id="suggestedUsersList" class="space-y-3"></div>
           </div>
@@ -272,7 +272,7 @@
 
       </section>
 
-      <!-- 3. DIRECT MESSENGER VIEW -->
+      <!-- 3. DIRECT MESSENGER VIEW (FIXED TWO-WAY CHAT) -->
       <section id="chatView" class="hidden w-full max-w-5xl h-[calc(100vh-100px)] glass-card rounded-3xl border border-rosegold-300/20 overflow-hidden flex shadow-2xl">
         
         <div class="w-full md:w-80 border-r border-rosegold-300/10 flex flex-col bg-maroon-950/50">
@@ -454,7 +454,7 @@
 
     const liveChannel = new BroadcastChannel('cappuccino_live_bridge');
 
-    liveChannel.onmessage = (event) => {
+    liveChannel.onmessage = async (event) => {
       const { type, payload } = event.data;
       if (type === 'NEW_POST') {
         renderNewsfeed();
@@ -468,7 +468,14 @@
         if (activeChatUserId && activeChatUserId === payload.senderId) {
           showLiveTypingIndicator(payload.isTyping);
         }
-      } else if (type === 'USER_STATUS_CHANGE') {
+      } else if (type === 'USER_STATUS_CHANGE' || type === 'FOLLOW_UPDATE') {
+        // Refresh current user session info from DB in multi-tab context
+        const users = await dbGetAll('users');
+        const updatedMe = users.find(u => u.id === currentUser.id);
+        if (updatedMe) {
+          currentUser = updatedMe;
+          localStorage.setItem('cappuccino_session', JSON.stringify(currentUser));
+        }
         loadSuggestedUsers();
         renderChatUsers();
       }
@@ -554,6 +561,7 @@
         currentUser = found;
         currentUser.isOnline = true;
         currentUser.lastSeen = Date.now();
+        if (!currentUser.following) currentUser.following = [];
         await dbPut('users', currentUser);
         localStorage.setItem('cappuccino_session', JSON.stringify(currentUser));
         broadcastEvent('USER_STATUS_CHANGE', { userId: currentUser.id });
@@ -694,20 +702,21 @@
     }
 
     /* ==========================================================================
-       SUGGESTED USERS (EXCLUDING CURRENT LOGGED-IN USER)
+       SUGGESTED USERS (PUBLIC DIRECTORY EXCLUDING MYSELF)
        ========================================================================== */
     async function loadSuggestedUsers() {
       const container = document.getElementById('suggestedUsersList');
       if (!container) return;
 
       const users = await dbGetAll('users');
-      const followingList = currentUser.following || [];
+      if (!currentUser.following) currentUser.following = [];
+      const followingList = currentUser.following;
       
-      // EXCLUDE CURRENT USER SO MY OWN ID DOES NOT SHOW UP IN SUGGESTED LIST
+      // Filter out current logged in user so my own account never shows up in suggestion
       const suggestions = users.filter(u => u.id !== currentUser.id);
 
       if (suggestions.length === 0) {
-        container.innerHTML = `<div class="text-xs text-rosegold-100/50 text-center py-2">No other accounts found. Open another tab to register new CC accounts!</div>`;
+        container.innerHTML = `<div class="text-xs text-rosegold-100/50 text-center py-2">No other public users found yet. Register another account in a new tab!</div>`;
         return;
       }
 
@@ -765,6 +774,7 @@
       await dbPut('users', currentUser);
       localStorage.setItem('cappuccino_session', JSON.stringify(currentUser));
       loadSuggestedUsers();
+      renderChatUsers();
       broadcastEvent('FOLLOW_UPDATE', { userId: currentUser.id });
     }
 
@@ -905,14 +915,20 @@
       }
     }
 
+    /* ==========================================================================
+       TWO-WAY LIVE MESSENGER ENGINE
+       ========================================================================== */
     async function renderChatUsers() {
       const usersList = document.getElementById('chatUsersList');
       const users = await dbGetAll('users');
-      const followingList = currentUser.following || [];
+      if (!currentUser.following) currentUser.following = [];
+      const followingList = currentUser.following;
+      
+      // Show followed users in chat list for two-way communication
       const chatableUsers = users.filter(u => u.id !== currentUser.id && followingList.includes(u.id));
 
       if (chatableUsers.length === 0) {
-        usersList.innerHTML = `<div class="p-4 text-xs text-rosegold-100/50 text-center">Follow users from the Suggested list on your Feed to start chatting with them!</div>`;
+        usersList.innerHTML = `<div class="p-4 text-xs text-rosegold-100/50 text-center">Follow users from the Suggested list on your Feed to start two-way chatting with them!</div>`;
         return;
       }
 
@@ -1032,7 +1048,6 @@
       }
 
       const users = await dbGetAll('users');
-      // Search public users excluding myself
       const matches = users.filter(u => u.id !== currentUser.id && (u.name.toLowerCase().includes(query.toLowerCase()) || u.username.toLowerCase().includes(query.toLowerCase())));
 
       resultsContainer.innerHTML = matches.map(u => `
